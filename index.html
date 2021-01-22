@@ -7,7 +7,16 @@
     <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="main.js"></script>
   </head>
-  <body onload="testQuery();">
-    <h1 id="test">Test du client ! </h1>
+  <body>
+    <h1 id="test">Rechercher un joueur </h1>
+    <form name=form enctype="multipart/form-data" action="javascript:chercherJoueur(this.form.player_name.value)" method="post">
+      <div>
+        <label for="name">Nom du joueur : </label>
+        <input type="text" id="name" name="player_name">
+      </div>
+      <div class="button">
+        <button type="submit">Chercher le joueur</button>
+      </div>
+    </form>
   </body>
 </html>
