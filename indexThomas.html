@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Mon Document</title>
+    <title>NBA Stats</title>
     <meta charset="UTF-8">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="mainThomas.js"></script>
   </head>
   <body>
+
+    <!-- Stats selector -->
     <div>
         <label for="stats_select" class="required">Statistique :</label>
         <select id="stats_select" name="stats_select" >
@@ -41,12 +43,24 @@
         </select>
         <button onclick="printStat()" id="stat_button" type="button">Afficher</button>
     </div>
-    <table id="dataTable">
+
+    <!-- Error message when choosing a parameter for which we can't have a graph for all seasons for now -->
+    <h1 id="errorParameterAllSeasons"></h1>
+
+    <!-- Stats table -->
+    <table id="dataTable" style="text-align: center;">
       <thead>
         <tr id="headerTable">
         </tr>
       </thead>
       <tbody id="bodyTable"></tbody>
     </table>
+
+    <!-- Graph section -->
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v4.js"></script>
+
+    <!-- Create a div where the graph will take place -->
+    <div id="my_dataviz"></div>
   </body>
 </html>
