@@ -44,6 +44,18 @@
         <button onclick="printStat()" id="stat_button" type="button">Afficher</button>
     </div>
 
+    <div>
+      <form name="radio_value" onSubmit="return handleDisplay()">
+        <p>Affichage des données :
+          <input type="radio" id="display_graph" name="displayName" value="graph">
+          <label for="display_graph">Graphique</label>
+          <input type="radio" id="display_table" name="displayName" value="table">
+          <label for="display_table">Tableau</label>
+          <input type="submit" value="Choisir">
+        </p>
+      </form>
+    </div>
+
     <!-- Error message when choosing a parameter for which we can't have a graph for all seasons for now -->
     <h1 id="errorParameterAllSeasons"></h1>
 
@@ -51,30 +63,34 @@
     <!-- Load d3.js -->
     <script src="https://d3js.org/d3.v4.js"></script>
 
-    <!-- Create a table where the graph and the table will take place -->
-    <table>
-      <tr>
-        <td>
-          <div id="my_dataviz"></div>
-        </td>
-        <td>
-          <table id="my_datatable" style="border-collapse: collapse; text-align: center;">
-            <thead>
-              <tr id="my_headerTable"></tr>
-            </thead>
-            <tbody id="my_bodyTable" class="displayNone" style="border: 1px solid black; height: 400px; padding-right: 5px; overflow-y: scroll;"></tbody>
-          </table>
-        </td>
-      </tr>
-    </table>
-
-    <!-- Stats table -->
-    <table id="dataTable" style="text-align: center;">
-      <thead>
-        <tr id="headerTable">
+    <div id="graph_section" class="displayNone">
+      <!-- Create a table where the graph and the table will take place -->
+      <table>
+        <tr>
+          <td>
+            <div id="my_dataviz"></div>
+          </td>
+          <td>
+            <table id="my_datatable" style="border-collapse: collapse; text-align: center;">
+              <thead>
+                <tr id="my_headerTable"></tr>
+              </thead>
+              <tbody id="my_bodyTable" class="displayNone" style="border: 1px solid black; height: 400px; padding-right: 5px; overflow-y: scroll;"></tbody>
+            </table>
+          </td>
         </tr>
-      </thead>
-      <tbody id="bodyTable"></tbody>
-    </table>
+      </table>
+    </div>
+
+    <div id="table_section" class="displayNone">
+      <!-- Stats table -->
+      <table id="dataTable" style="text-align: center;">
+        <thead>
+          <tr id="headerTable">
+          </tr>
+        </thead>
+        <tbody id="bodyTable"></tbody>
+      </table>
+    </div>
   </body>
 </html>

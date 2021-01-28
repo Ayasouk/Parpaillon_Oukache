@@ -56,6 +56,7 @@ ORDER BY asc(UCASE(str(?season)))`;
 });
 
 function printStat() {
+  window.isGraphable = [true, null];
   $("#errorParameterAllSeasons").html("");
   $("svg").remove()
   let my_headerTable = document.getElementById("my_headerTable");
@@ -68,6 +69,11 @@ function printStat() {
   }
   $("#my_bodyTable").removeClass("displayBlock");
   $("#my_bodyTable").addClass('displayNone');
+  $("#table_section").removeClass("displayBlock");
+  $("#table_section").addClass('displayNone');
+  $("#graph_section").removeClass("displayBlock");
+  $("#graph_section").addClass('displayNone');
+  $('input[name=displayName]').attr('checked',false);
 
   var param_text;
   param_text = document.getElementById("stats_select").options[document.getElementById('stats_select').selectedIndex].text;
@@ -197,7 +203,7 @@ function printStat() {
             });
   }
   else {
-    //Displaying data in table : maybe remove at the end when everything is a graph ?
+    //Displaying data in table
     var element_table = document.getElementById("headerTable");
     while (element_table.firstChild) {
         element_table.removeChild(element_table.firstChild);
@@ -211,6 +217,11 @@ function printStat() {
     let th_param_txt = document.createTextNode(param_text);
     th_param.appendChild(th_param_txt);
     element_table.appendChild(th_param);
+
+    // var body_table = document.getElementById("bodyTable");
+    // while (body_table.firstChild) {
+    //     body_table.removeChild(body_table.firstChild);
+    // }
     if (notStatsRDF.includes(res_stats[0])) {
       query = `PREFIX : <http://project#>
 
@@ -391,6 +402,9 @@ function printStat() {
         },
         error: displayError
       });
+    }
+    else {
+      window.isGraphable = [false, res_stats[0]];
     }
   }
 }
@@ -825,4 +839,40 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
       .style("font-size", "16px")
       .style("text-decoration", "underline")
       .text("Saison " + currentSeason);
+}
+
+function getRadioButtonValue(rbutton) {
+  for (var i = 0; i < rbutton.length; ++i) {
+    if (rbutton[i].checked) {
+      return rbutton[i].value;
+    }
+  }
+  return null;
+}
+
+function handleDisplay() {
+  let choice = getRadioButtonValue(document.radio_value.displayName);
+  if (choice == "graph") {
+    $("#table_section").removeClass("displayBlock");
+    $("#table_section").addClass('displayNone');
+
+    if (window.isGraphable[0]) {
+      $("#graph_section").removeClass("displayNone");
+      $("#graph_section").addClass('displayBlock');
+    }
+    else {
+      notAllSeasons_function(window.isGraphable[1]);
+    }
+  }
+  if (choice == "table") {
+    if (!(window.isGraphable[0])) {
+      $("#errorParameterAllSeasons").html("");
+    }
+    $("#graph_section").removeClass("displayBlock");
+    $("#graph_section").addClass('displayNone');
+
+    $("#table_section").removeClass("displayNone");
+    $("#table_section").addClass('displayBlock');
+  }
+  return false; // prevent further bubbling of event
 }
