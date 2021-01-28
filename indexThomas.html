@@ -47,6 +47,13 @@
     <!-- Error message when choosing a parameter for which we can't have a graph for all seasons for now -->
     <h1 id="errorParameterAllSeasons"></h1>
 
+    <!-- Graph section -->
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v4.js"></script>
+
+    <!-- Create a div where the graph will take place -->
+    <div id="my_dataviz"></div>
+
     <!-- Stats table -->
     <table id="dataTable" style="text-align: center;">
       <thead>
@@ -55,12 +62,5 @@
       </thead>
       <tbody id="bodyTable"></tbody>
     </table>
-
-    <!-- Graph section -->
-    <!-- Load d3.js -->
-    <script src="https://d3js.org/d3.v4.js"></script>
-
-    <!-- Create a div where the graph will take place -->
-    <div id="my_dataviz"></div>
   </body>
 </html>

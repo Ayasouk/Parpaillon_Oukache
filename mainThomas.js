@@ -70,7 +70,9 @@ function printStat() {
 
   var endpoint = "http://127.0.0.1:3030/project/sparql";
 
-  var notStats = ["name", "college", "country", "draftYear", "draftRound", "draftNumber"];
+  var notStatsRDF = ["name", "college", "country", "draftYear", "draftRound", "draftNumber"];
+  var notNumStat = ["college", "country", "draftYear", "draftRound", "draftNumber", "team"];
+  var notHistogram = ["college", "country","draftYear", "draftRound", "draftNumber", "team", "netRating"];
   var query;
 
   if (res_season[1] == "les") {
@@ -116,9 +118,8 @@ function printStat() {
                     },
                     success: function(data){
                         window.dataGraph = [];
-                        var notAllSeasons = ["college", "country", "draftYear", "draftRound", "draftNumber", "team"];
 
-                        if (notAllSeasons.includes(res_stats[0])) {
+                        if (notNumStat.includes(res_stats[0])) {
                           return notAllSeasons_function(res_stats[0]);
                         }
                         $.each(data.results.bindings, function(index, bs) {
@@ -135,7 +136,7 @@ function printStat() {
                             body_table.appendChild(tr_season);
 
 
-                            if (notStats.includes(res_stats[0])) {
+                            if (notNumStat.includes(res_stats[0])) {
                               query = `PREFIX : <http://project#>
 
                               SELECT ?name ?`+res_stats[1]+` ?index
@@ -179,7 +180,7 @@ function printStat() {
                               error: displayError
                             });
                         });
-                        printGraph();
+                        printScatterPlotGraphAllSeasons("Saisons", param_text);
                     },
                     error: displayError
             });
@@ -198,10 +199,10 @@ function printStat() {
     let th_param_txt = document.createTextNode(param_text);
     th_param.appendChild(th_param_txt);
     element_table.appendChild(th_param);
-    if (notStats.includes(res_stats[0])) {
+    if (notStatsRDF.includes(res_stats[0])) {
       query = `PREFIX : <http://project#>
 
-      SELECT ?name ?`+res_stats[1]+`
+      SELECT DISTINCT ?name ?`+res_stats[1]+`
       WHERE {
         ?name :`+res_stats[0]+` ?`+res_stats[1]+` .
         ?name :statistics
@@ -214,7 +215,7 @@ function printStat() {
     else {
       query = `PREFIX : <http://project#>
 
-      SELECT ?name ?`+res_stats[1]+`
+      SELECT DISTINCT ?name ?`+res_stats[1]+`
       WHERE {
         ?name :statistics
         [
@@ -238,6 +239,144 @@ function printStat() {
       success: displayResult,
       error: displayError
     });
+    if (!(notHistogram.includes(res_stats[0]))) {
+      query2 = `PREFIX : <http://project#>
+      PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+      SELECT DISTINCT ?name ?`+res_stats[1]+`
+      WHERE {
+        ?name :statistics
+        [
+          :season "`+res_season[1]+`";
+          :`+res_stats[0]+` ?`+res_stats[1]+`
+        ]
+      }
+      ORDER BY xsd:decimal(?`+res_stats[1]+`)`;
+      $.ajax({
+        url: endpoint,
+        dataType: 'json',
+        data: {
+          traditional: true,
+          queryLn: 'SPARQL',
+          query: query2 ,
+          limit: 'none',
+          infer: 'true',
+          Accept: 'application/sparql-results+json'
+        },
+        success: function(data) {
+          console.log(data);
+          var setDataGraph = [];
+          var dataForHistogram = [];
+          var occurs = 0;
+          // window.dataGraph = [];
+          var head1 = data.head.vars[1]; //object
+          $.each(data.results.bindings, function(index, bs) {
+            let val_rounded;
+            switch (head1)
+            {
+              case "age":
+              // val_rounded = Math.round(bs.age.value);
+              val_rounded = bs.age.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+                // window.dataGraph[val_rounded] = [val_rounded, 1];
+              }
+              // else {
+                //     window.dataGraph[val_rounded][1]++;
+                //   }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "player_weight":
+              val_rounded = bs.player_weight.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "player_height":
+              val_rounded = bs.player_height.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "pts":
+              val_rounded = bs.pts.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "reb":
+              val_rounded = bs.reb.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "ast":
+              val_rounded = bs.ast.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "net_rating":
+              val_rounded = bs.net_rating.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "oreb_pct":
+              val_rounded = bs.oreb_pct.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "dreb_pct":
+              val_rounded = bs.dreb_pct.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "usg_pct":
+              val_rounded = bs.usg_pct.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "ts_pct":
+              val_rounded = bs.ts_pct.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+              case "ast_pct":
+              val_rounded = bs.ast_pct.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+              break;
+
+              default: //gamesPlayed by default
+              val_rounded = bs.gp.value;
+              if (!(setDataGraph.includes(val_rounded))) {
+                setDataGraph.push(val_rounded);
+              }
+              dataForHistogram.push(val_rounded);
+            }
+          });
+          printHistogram(param_text, dataForHistogram, setDataGraph);
+        },
+        error: displayError
+      });
+    }
   }
 }
 
@@ -374,7 +513,6 @@ function displayResultAllSeasons(data) {
             break;
           case "ast_pct":
             sum += Number(bs.ast_pct.value);
-            console.log(sum);
             break;
 
           default: //gamesPlayed by default
@@ -402,7 +540,7 @@ function notAllSeasons_function(data) {
   $("#errorParameterAllSeasons").html("Can't load "+data+" for all seasons");
 }
 
-function printGraph() {
+function printScatterPlotGraphAllSeasons(param_text_x, param_text_y) {
   // set the dimensions and margins of the graph
   var margin = {top: 10, right: 30, bottom: 30, left: 60},
       width = 1000 - margin.left - margin.right,
@@ -430,6 +568,12 @@ function printGraph() {
       // .style("text-anchor", "end")
       // .style("font-size", 20)
       // .style("fill", "#69a3b2");
+  svg.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "end")
+    .attr("x", width)
+    .attr("y", height - 6)
+    .text(param_text_x);
 
   // Y axis
   let domainStat = [];
@@ -437,11 +581,36 @@ function printGraph() {
   let yMax = Math.max(...domainStat);
   let yMin = Math.min(...domainStat);
   let range2 = (yMax - yMin) / 2;
+
+  let textY = document.createElement("span");
+  document.body.appendChild(textY);
+
+  textY.style.font = "times new roman";
+  textY.style.fontSize = 16 + "px";
+  textY.style.height = 'auto';
+  textY.style.width = 'auto';
+  textY.style.position = 'absolute';
+  textY.style.whiteSpace = 'no-wrap';
+  textY.innerHTML = param_text_y;
+
+  let widthY = Math.ceil(textY.clientWidth);
+  formattedWidth = widthY;
+
+  document.body.removeChild(textY);
+
   var y = d3.scaleLinear()
     .domain([yMin - range2, yMax + range2])
     .range([ height, 0 ]);
   svg.append("g")
-    .call(d3.axisLeft(y));
+    .call(d3.axisLeft(y))
+  svg.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "end")
+    .attr("y", 0)
+    .attr("x", formattedWidth + 5)
+    .attr("dy", ".75em")
+    // .attr("transform", "rotate(-90)")
+    .text(param_text_y);
 
   // Add the line
   svg.append("path")
@@ -464,4 +633,134 @@ function printGraph() {
       .attr("cy", function(d) { return y(d[2]) } )
       .attr("r", 5)
       .attr("fill", "#69b3a2")
+}
+
+//Let's be crazy : display name of players when rect clicked
+function printHistogram(param_text_x, dataForHistogram, dataDistinct) {
+  // console.log(dataDistinct);
+  // set the dimensions and margins of the graph
+  var margin = {top: 20, right: 30, bottom: 30, left: 40},
+      width = 1200 - margin.left - margin.right,
+      height = 520 - margin.top - margin.bottom;
+  // append the svg object to the body of the page
+  var svg = d3.select("#my_dataviz")
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom + 50)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+  // append toolkit to svg object
+  const div = d3.select("#my_dataviz").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+  // X axis
+  let xMax = d3.max(dataForHistogram, function(d) { return +d });
+  let xMin = d3.min(dataForHistogram, function(d) { return +d });
+
+  let textX = document.createElement("span");
+  document.body.appendChild(textX);
+
+  textX.style.font = "times new roman";
+  textX.style.fontSize = 16 + "px";
+  textX.style.height = 'auto';
+  textX.style.width = 'auto';
+  textX.style.position = 'absolute';
+  textX.style.whiteSpace = 'no-wrap';
+  textX.innerHTML = "bla";
+
+  let widthX = Math.ceil(textX.clientHeight);
+  formattedHeight = widthX;
+
+  document.body.removeChild(textX);
+
+  var x = d3.scaleLinear()
+    .domain([xMin, xMax]) //last value not shown, NEED to extend domain but wisely
+    .range([0, width]); //or here I dunno I'm tired
+  svg
+    .append("g")
+    .attr("transform", "translate(0," + height + ")")      // This controls the vertical position of the Axis
+    .call(d3.axisBottom(x));
+  svg.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "end")
+    .attr("x", width)
+    .attr("y", height + formattedHeight + 15)
+    .text(param_text_x);
+
+  // set the parameters for the histogram
+  let nbins = 70;
+  let nbins2 = dataDistinct.length;
+  var histogram = d3.histogram()
+      .value(function(d) { return d; })   // I need to give the vector of value
+      .domain(x.domain())  // then the domain of the graphic
+      .thresholds(x.ticks(nbins2)); // then the numbers of bins
+
+  // And apply this function to data to get the bins
+  var bins = histogram(dataForHistogram);
+
+  // Y axis
+  // let domainOrdinate = [];
+  // window.dataGraph.forEach(element => domainOrdinate.push(element[1]));
+  // domainOrdinate.sort();
+  // let yMax = Math.max(...domainOrdinate);
+  // let yMin = Math.min(...domainOrdinate);
+  // let range2 = (yMax - yMin) / 2;
+
+  let textY = document.createElement("span");
+  document.body.appendChild(textY);
+
+  textY.style.font = "times new roman";
+  textY.style.fontSize = 16 + "px";
+  textY.style.height = 'auto';
+  textY.style.width = 'auto';
+  textY.style.position = 'absolute';
+  textY.style.whiteSpace = 'no-wrap';
+  textY.innerHTML = "Nombre de joueurs";
+
+  let widthY = Math.ceil(textY.clientWidth);
+  formattedWidth = widthY;
+
+  document.body.removeChild(textY);
+
+  let yMax = d3.max(bins, function(d) { return d.length; });
+  let yMin = d3.min(bins, function(d) { return d.length; });
+  let range4 = (yMax - yMin) / 4;
+  var y = d3.scaleLinear()
+    // .domain([0, yMax + range4])
+    .domain([0, yMax])
+    .range([ height, 0 ]);
+  svg.append("g")
+    .call(d3.axisLeft(y))
+  svg.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "end")
+    .attr("y", -formattedHeight)
+    .attr("x", formattedWidth + 5)
+    .attr("dy", ".75em")
+    .text("Nombre de joueurs");
+
+  // append the bar rectangles to the svg element
+  svg.selectAll(".bar")
+      .data(bins)
+      .enter()
+      .append("rect")
+        .attr("class", "bar")
+        .attr("x", 1)
+        .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
+        .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+        .attr("height", function(d) { return height - y(d.length); })
+        .on("mouseover", function(d) {
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            div.html(param_text_x + " : " + d.x0 + "<br>" + d.length + " joueur(s)")
+                .style("left", (d3.event.pageX + 10) + "px")
+                .style("top", (d3.event.pageY - 50) + "px");
+        })
+        .on("mouseout", function(d) {
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 }
