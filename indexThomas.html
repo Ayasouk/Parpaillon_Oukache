@@ -51,8 +51,22 @@
     <!-- Load d3.js -->
     <script src="https://d3js.org/d3.v4.js"></script>
 
-    <!-- Create a div where the graph will take place -->
-    <div id="my_dataviz"></div>
+    <!-- Create a table where the graph and the table will take place -->
+    <table>
+      <tr>
+        <td>
+          <div id="my_dataviz"></div>
+        </td>
+        <td>
+          <table id="my_datatable" style="border-collapse: collapse; text-align: center;">
+            <thead>
+              <tr id="my_headerTable"></tr>
+            </thead>
+            <tbody id="my_bodyTable" class="displayNone" style="border: 1px solid black; height: 400px; padding-right: 5px; overflow-y: scroll;"></tbody>
+          </table>
+        </td>
+      </tr>
+    </table>
 
     <!-- Stats table -->
     <table id="dataTable" style="text-align: center;">

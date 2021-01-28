@@ -40,3 +40,13 @@ h1 {
 .bar:hover {
   fill: #4d8074;
 }
+
+.displayNone {
+    display: none;
+}
+.displayBlock {
+   display: block;
+}
+.displayInlineBlock {
+   display: inline-block;
+}

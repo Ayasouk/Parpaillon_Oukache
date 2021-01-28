@@ -58,6 +58,17 @@ ORDER BY asc(UCASE(str(?season)))`;
 function printStat() {
   $("#errorParameterAllSeasons").html("");
   $("svg").remove()
+  let my_headerTable = document.getElementById("my_headerTable");
+  while (my_headerTable.firstChild) {
+      my_headerTable.removeChild(my_headerTable.firstChild);
+  }
+  let my_bodyTable = document.getElementById("my_bodyTable");
+  while (my_bodyTable.firstChild) {
+      my_bodyTable.removeChild(my_bodyTable.firstChild);
+  }
+  $("#my_bodyTable").removeClass("displayBlock");
+  $("#my_bodyTable").addClass('displayNone');
+
   var param_text;
   param_text = document.getElementById("stats_select").options[document.getElementById('stats_select').selectedIndex].text;
   var str;
@@ -186,6 +197,7 @@ function printStat() {
             });
   }
   else {
+    //Displaying data in table : maybe remove at the end when everything is a graph ?
     var element_table = document.getElementById("headerTable");
     while (element_table.firstChild) {
         element_table.removeChild(element_table.firstChild);
@@ -239,6 +251,8 @@ function printStat() {
       success: displayResult,
       error: displayError
     });
+
+    // Displaying data as graph
     if (!(notHistogram.includes(res_stats[0]))) {
       query2 = `PREFIX : <http://project#>
       PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -264,13 +278,14 @@ function printStat() {
           Accept: 'application/sparql-results+json'
         },
         success: function(data) {
-          console.log(data);
           var setDataGraph = [];
           var dataForHistogram = [];
           var occurs = 0;
           // window.dataGraph = [];
           var head1 = data.head.vars[1]; //object
           $.each(data.results.bindings, function(index, bs) {
+            let res = bs.name.value.split("http://project#");
+            let res_space = res[1].replace("_", " ");
             let val_rounded;
             switch (head1)
             {
@@ -284,84 +299,84 @@ function printStat() {
               // else {
                 //     window.dataGraph[val_rounded][1]++;
                 //   }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "player_weight":
               val_rounded = bs.player_weight.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "player_height":
               val_rounded = bs.player_height.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "pts":
               val_rounded = bs.pts.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "reb":
               val_rounded = bs.reb.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "ast":
               val_rounded = bs.ast.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "net_rating":
               val_rounded = bs.net_rating.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "oreb_pct":
               val_rounded = bs.oreb_pct.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "dreb_pct":
               val_rounded = bs.dreb_pct.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "usg_pct":
               val_rounded = bs.usg_pct.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "ts_pct":
               val_rounded = bs.ts_pct.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
               case "ast_pct":
               val_rounded = bs.ast_pct.value;
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
               break;
 
               default: //gamesPlayed by default
@@ -369,10 +384,10 @@ function printStat() {
               if (!(setDataGraph.includes(val_rounded))) {
                 setDataGraph.push(val_rounded);
               }
-              dataForHistogram.push(val_rounded);
+              dataForHistogram.push([val_rounded, res_space]);
             }
           });
-          printHistogram(param_text, dataForHistogram, setDataGraph);
+          printHistogram(param_text, dataForHistogram, setDataGraph, res_season[1]);
         },
         error: displayError
       });
@@ -635,11 +650,9 @@ function printScatterPlotGraphAllSeasons(param_text_x, param_text_y) {
       .attr("fill", "#69b3a2")
 }
 
-//Let's be crazy : display name of players when rect clicked
-function printHistogram(param_text_x, dataForHistogram, dataDistinct) {
-  // console.log(dataDistinct);
+function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSeason) {
   // set the dimensions and margins of the graph
-  var margin = {top: 20, right: 30, bottom: 30, left: 40},
+  var margin = {top: 30, right: 30, bottom: 30, left: 40},
       width = 1200 - margin.left - margin.right,
       height = 520 - margin.top - margin.bottom;
   // append the svg object to the body of the page
@@ -655,8 +668,8 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct) {
     .attr("class", "tooltip")
     .style("opacity", 0);
   // X axis
-  let xMax = d3.max(dataForHistogram, function(d) { return +d });
-  let xMin = d3.min(dataForHistogram, function(d) { return +d });
+  let xMax = d3.max(dataForHistogram, function(d) { return +d[0] });
+  let xMin = d3.min(dataForHistogram, function(d) { return +d[0] });
 
   let textX = document.createElement("span");
   document.body.appendChild(textX);
@@ -676,7 +689,7 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct) {
 
   var x = d3.scaleLinear()
     .domain([xMin, xMax]) //last value not shown, NEED to extend domain but wisely
-    .range([0, width]); //or here I dunno I'm tired
+    .range([0, width]);
   svg
     .append("g")
     .attr("transform", "translate(0," + height + ")")      // This controls the vertical position of the Axis
@@ -692,7 +705,7 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct) {
   let nbins = 70;
   let nbins2 = dataDistinct.length;
   var histogram = d3.histogram()
-      .value(function(d) { return d; })   // I need to give the vector of value
+      .value(function(d) { return d[0]; })   // I need to give the vector of value
       .domain(x.domain())  // then the domain of the graphic
       .thresholds(x.ticks(nbins2)); // then the numbers of bins
 
@@ -762,5 +775,54 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct) {
             div.transition()
                 .duration(500)
                 .style("opacity", 0);
+        })
+        .on("mouseup", function(d) {
+            let my_headerTable = document.getElementById("my_headerTable");
+            while (my_headerTable.firstChild) {
+                my_headerTable.removeChild(my_headerTable.firstChild);
+            }
+            let my_bodyTable = document.getElementById("my_bodyTable");
+            while (my_bodyTable.firstChild) {
+                my_bodyTable.removeChild(my_bodyTable.firstChild);
+            }
+            $("#my_bodyTable").removeClass("displayNone");
+            $("#my_bodyTable").addClass('displayBlock');
+            let th_my_data = document.createElement("th");
+            let att = document.createAttribute("style");
+            att.value = "border: 1px solid black; padding: 5px";
+            th_my_data.setAttributeNode(att);
+            // let th_my_data_txt = document.createTextNode("Joueur | " + param_text_x);
+            let th_my_data_txt = document.createTextNode("Joueur(s)");
+            th_my_data.appendChild(th_my_data_txt);
+            my_headerTable.appendChild(th_my_data);
+
+            d.forEach(function(element){
+              let tr_elem = document.createElement("tr");
+
+              let td1_elem = document.createElement("td");
+              att = document.createAttribute("style");
+              att.value = "border: 1px solid black; padding: 5px";
+              td1_elem.setAttributeNode(att);
+              let td1_elem_txt = document.createTextNode(element[1]);
+              td1_elem.appendChild(td1_elem_txt);
+              tr_elem.appendChild(td1_elem);
+
+              let td2_elem = document.createElement("td");
+              att = document.createAttribute("style");
+              att.value = "border: 1px solid black; padding: 5px";
+              td2_elem.setAttributeNode(att);
+              let td2_elem_txt = document.createTextNode(element[0]);
+              td2_elem.appendChild(td2_elem_txt);
+              tr_elem.appendChild(td2_elem);
+
+              my_bodyTable.appendChild(tr_elem);
+            })
         });
+  svg.append("text")
+      .attr("x", (width / 2))
+      .attr("y", 0 - (margin.top / 2))
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("text-decoration", "underline")
+      .text("Saison " + currentSeason);
 }
