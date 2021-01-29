@@ -10,7 +10,7 @@
   </head>
   <body>
     <h1 id="test">Rechercher un joueur </h1>
-    <form name="form" enctype="multipart/form-data" onSubmit="return chercherJoueur(this.form.player_name.value)" method="post">
+    <form name="form" enctype="multipart/form-data" action="javascript:chercherJoueur(this.form.player_name.value)" method="post">
       <div>
         <label for="name">Nom du joueur : </label>
         <input type="text" id="name" name="player_name">
@@ -19,7 +19,7 @@
         <button type="submit">Chercher le joueur</button>
       </div>
     </form>
-    <form name=form enctype="multipart/form-data" action="javascript:displayGraph()" method="post">
+    <form name="form2" enctype="multipart/form-data" action="javascript:displayGraph()" method="post">
       <div class="button">
         <button type="submit">Afficher graphe</button>
       </div>
@@ -68,5 +68,6 @@
         <tbody id="bodyTable"></tbody>
       </table>
     </div>
+
   </body>
 </html>

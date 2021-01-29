@@ -4,6 +4,39 @@ console.log("Test réussi ! ");
 //});
 //dans index.html <body onload="testQuery();">
 
+$(document).ready(function(){
+  var endpoint = "http://127.0.0.1:3030/nba_dataset/sparql";
+  //Load each season
+  var query = `PREFIX : <http://project#>
+
+SELECT DISTINCT ?season
+WHERE {
+      _:b :statistics [
+    	:season ?season
+      ]
+    }
+ORDER BY asc(UCASE(str(?season)))`;
+    $.ajax({
+                url: endpoint,
+                dataType: 'json',
+                data: {
+                    traditional: true,
+                    queryLn: 'SPARQL',
+                    query: query ,
+                    limit: 'none',
+                    infer: 'true',
+                    Accept: 'application/sparql-results+json'
+                },
+                success: function(data){
+                    $.each(data.results.bindings, function(index, bs) {
+                        var season_txt = "Saison " + bs.season.value;
+                        $('#season_options').append("<option>"+season_txt+"</option>");
+                    });
+                },
+                error: displayError
+        });
+});
+
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.substring(1).toLowerCase();
 }
@@ -21,33 +54,20 @@ function chercherJoueur(data){
   console.log(data);
 
   var endpoint = "http://127.0.0.1:3030/nba_dataset/sparql";
-  var queryPlayer = `
+  var queryPlayer = `PREFIX : <http://project#>
 
 SELECT DISTINCT
   *
 where {
-  <http://project#:`+data+`> :name ?n;
-    <http://project#:draftYear> ?dy;
-    <http://project#:draftRound> ?dr;
-    <http://project#:draftNumber> ?dn;
-    <http://project#:country> ?cou;
-    <http://project#:college> ?col
+  :`+data+` :name ?n;
+    :draftYear ?dy;
+    :draftRound ?dr;
+    :draftNumber ?dn;
+    :country ?cou;
+    :college ?col
 
-} order by asc(?season)`;
-
-  var query = `PREFIX : <http://project#>
-
-SELECT DISTINCT
-  *
-where {
-  :`+data+` :statistics
-      [
-  :season ?season;
-  :gamesPlayed ?gp;
-  :pointsScoredAverage ?pts
-  ]
-
-} order by asc(?season)`;
+}`;
+console.log("data : ", data)
 
 $.ajax({
             url: endpoint,
