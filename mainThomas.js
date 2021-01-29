@@ -26,30 +26,6 @@ ORDER BY asc(UCASE(str(?season)))`;
                         var season_txt = "Saison " + bs.season.value;
                         $('#season_options').append("<option>"+season_txt+"</option>");
                     });
-                    //global Count(players) : 2231
-                    var query = `PREFIX : <http://project#>
-
-                    SELECT (COUNT(?s) as ?sCount)
-                    WHERE
-                    {
-                      ?s :name ?o .
-                    }`;
-                      $.ajax({
-                                  url: endpoint,
-                                  dataType: 'json',
-                                  data: {
-                                      traditional: true,
-                                      queryLn: 'SPARQL',
-                                      query: query ,
-                                      limit: 'none',
-                                      infer: 'true',
-                                      Accept: 'application/sparql-results+json'
-                                  },
-                                  success: function(data){
-                                      window.totalPlayers = data.results.bindings[0].sCount.value;
-                                  },
-                                  error: displayError
-                          });
                 },
                 error: displayError
         });
@@ -664,6 +640,10 @@ function printScatterPlotGraphAllSeasons(param_text_x, param_text_y) {
       .attr("fill", "#69b3a2")
 }
 
+//param_text_x : nom "propre" du parametre choisi
+//dataForHistogram : liste de tuples [abscisse, ordonnee]
+//dataDistinct : liste de donnees (abscisse) distinctes (une sule fois, pour calculer le nombre de bins (rectangles) ,ecessaires)
+//currentSeason : saison actuelle (sous la forme "1997-98")
 function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSeason) {
   // set the dimensions and margins of the graph
   var margin = {top: 30, right: 30, bottom: 30, left: 40},
@@ -677,14 +657,16 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
     .append("g")
       .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
-  // append toolkit to svg object
+  // append toolkit to svg object (display nicely the name of the players and their corresponding data in a table)
   const div = d3.select("#my_dataviz").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
   // X axis
+  //xMax and xMin for the domain
   let xMax = d3.max(dataForHistogram, function(d) { return +d[0] });
   let xMin = d3.min(dataForHistogram, function(d) { return +d[0] });
 
+  //get the height in pixels of a text to position it as we want on the axis
   let textX = document.createElement("span");
   document.body.appendChild(textX);
 
@@ -701,14 +683,15 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
 
   document.body.removeChild(textX);
 
+  //draw x axis
   var x = d3.scaleLinear()
-    .domain([xMin, xMax]) //last value not shown, NEED to extend domain but wisely
+    .domain([xMin, xMax]) //last value not shown, NEED to extend domain but wisely TO MODIFY
     .range([0, width]);
   svg
     .append("g")
     .attr("transform", "translate(0," + height + ")")      // This controls the vertical position of the Axis
     .call(d3.axisBottom(x));
-  svg.append("text")
+  svg.append("text")  //add x label
     .attr("class", "x label")
     .attr("text-anchor", "end")
     .attr("x", width)
@@ -716,10 +699,10 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
     .text(param_text_x);
 
   // set the parameters for the histogram
-  let nbins = 70;
+  let nbins = 70; //set number (not adaptable to the dataset)
   let nbins2 = dataDistinct.length;
   var histogram = d3.histogram()
-      .value(function(d) { return d[0]; })   // I need to give the vector of value
+      .value(function(d) { return d[0]; })   // give the vector of value
       .domain(x.domain())  // then the domain of the graphic
       .thresholds(x.ticks(nbins2)); // then the numbers of bins
 
@@ -727,13 +710,7 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
   var bins = histogram(dataForHistogram);
 
   // Y axis
-  // let domainOrdinate = [];
-  // window.dataGraph.forEach(element => domainOrdinate.push(element[1]));
-  // domainOrdinate.sort();
-  // let yMax = Math.max(...domainOrdinate);
-  // let yMin = Math.min(...domainOrdinate);
-  // let range2 = (yMax - yMin) / 2;
-
+  //get the width in pixels of the name of the parameter to position it as we want on the axis
   let textY = document.createElement("span");
   document.body.appendChild(textY);
 
@@ -750,6 +727,7 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
 
   document.body.removeChild(textY);
 
+  //yMax and yMin for the domain
   let yMax = d3.max(bins, function(d) { return d.length; });
   let yMin = d3.min(bins, function(d) { return d.length; });
   let range4 = (yMax - yMin) / 4;
@@ -791,6 +769,7 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
                 .style("opacity", 0);
         })
         .on("mouseup", function(d) {
+            //create table for specific info when clicking on a bin
             let my_headerTable = document.getElementById("my_headerTable");
             while (my_headerTable.firstChild) {
                 my_headerTable.removeChild(my_headerTable.firstChild);
@@ -832,7 +811,7 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
               my_bodyTable.appendChild(tr_elem);
             })
         });
-  svg.append("text")
+  svg.append("text") //display current season
       .attr("x", (width / 2))
       .attr("y", 0 - (margin.top / 2))
       .attr("text-anchor", "middle")
