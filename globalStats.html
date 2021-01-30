@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <script type="text/javascript" src="mainThomas.js"></script>
+    <script type="text/javascript" src="globalStats.js"></script>
   </head>
   <body>
 
@@ -44,7 +44,7 @@
         <button onclick="printStat()" id="stat_button" type="button">Afficher</button>
     </div>
 
-    <div>
+    <div id="radio_div" class="displayNone">
       <form name="radio_value" onSubmit="return handleDisplay()">
         <p>Affichage des données :
           <input type="radio" id="display_graph" name="displayName" value="graph">
