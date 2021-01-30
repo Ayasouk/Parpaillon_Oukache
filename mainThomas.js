@@ -1,5 +1,5 @@
 $(document).ready(function(){
-  var endpoint = "http://127.0.0.1:3030/project/sparql";
+  var endpoint = "http://127.0.0.1:3030/nba_dataset/sparql";
   //Load each season
   var query = `PREFIX : <http://project#>
 
@@ -61,7 +61,7 @@ function printStat() {
   season_selected = document.getElementById("season_select").options[document.getElementById('season_select').selectedIndex].value;
   var res_season = season_selected.split(" ");
 
-  var endpoint = "http://127.0.0.1:3030/project/sparql";
+  var endpoint = "http://127.0.0.1:3030/nba_dataset/sparql";
 
   var notStatsRDF = ["name", "college", "country", "draftYear", "draftRound", "draftNumber"];
   var notNumStat = ["college", "country", "draftYear", "draftRound", "draftNumber", "team"];
