@@ -335,10 +335,10 @@ function printStat() {
     th_param.appendChild(th_param_txt);
     element_table.appendChild(th_param);
 
-    // var body_table = document.getElementById("bodyTable");
-    // while (body_table.firstChild) {
+    //var body_table = document.getElementById("bodyTable");
+    //while (body_table.firstChild) {
     //     body_table.removeChild(body_table.firstChild);
-    // }
+    //}
     if (notStatsRDF.includes(res_stats[0])) {
       query = `PREFIX : <http://project#>
 
