@@ -1,5 +1,4 @@
 h1 {
-  color:#f00;
   color:#000;
 }
 
@@ -11,10 +10,8 @@ body {
 }
 
 #player {
-  background-color: #00f;
   background-color: #fff;
   height: 30%;
-  width:20%;
   width: 40%;
   position:'relative';
   border-radius: 2px;
