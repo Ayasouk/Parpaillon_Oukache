@@ -143,5 +143,5 @@ select {
 
 .fa-home:hover {
   cursor: pointer;
-  color: white !important;
+  color: #d3d3d3 !important;
 }
