@@ -188,6 +188,8 @@ function printStat(){
   var endpoint = "http://127.0.0.1:3030/nba_dataset/sparql";
 
   if (param_text=="Toutes statistiques"){
+    $("#graph_section").removeClass("displayBlock");
+    $("#graph_section").addClass('displayNone');
     var queryStats = `PREFIX : <http://project#>
 
       SELECT DISTINCT
@@ -240,6 +242,8 @@ function printStat(){
                                               <div id='tp'>Net rating : `+bs.net.value+`</div><br>
                           `;
                           $("#stat_info").append(stats)
+                          $("#graph_section").removeClass("displayBlock");
+                          $("#graph_section").addClass("displayNone");
                       });},
                       error: displayError
               });
@@ -397,7 +401,7 @@ function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
   text2X.style.width = 'auto';
   text2X.style.position = 'absolute';
   text2X.style.whiteSpace = 'no-wrap';
-  text2X.innerHTML = param_text_x;
+  text2X.innerHTML = "Saison";
 
   let widthX = Math.ceil(text2X.clientWidth);
   formattedWidth = widthX;
@@ -460,11 +464,11 @@ function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
     .attr("transform", "translate(0," + height + ")")      // This controls the vertical position of the Axis
     .call(d3.axisBottom(x))
     .selectAll("text")
-      .attr("transform", "translate(-20,20)rotate(-90)");
+      .attr("transform", "translate(-20,20)rotate(-45)");
   svg.append("text")  //add x label
     .attr("class", "x label")
     .attr("text-anchor", "end")
-    .attr("x", width + formattedWidth + 5)
+    .attr("x", width + formattedWidth +5)
     .attr("y", height)
     .text("Saison");
 
