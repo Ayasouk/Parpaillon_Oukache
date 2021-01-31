@@ -3,15 +3,32 @@ h1 {
 }
 
 #player {
-  background-color: #00f;
+  background-color: #fff;
   height: 30%;
-  width:20%;
+  width: 40%;
   position:'relative';
   border-radius: 2px;
   border-color: #000;
   border-width: 3px;
   top: 100px;
   left: 120px;
+}
+
+.playerInfo {
+  background-color: #00f;
+  position: relative;
+  height:240px;
+  width: 210px;
+  top: 30px;
+}
+
+.stat_info {
+  background-color: #f00;
+  height: 620px;
+  width: 900px;
+  position: absolute;
+  left: 220px;
+  top: 170px;
 }
 
 #player p{
