@@ -1,0 +1,147 @@
+h1 {
+  color:#000;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+#player {
+  background-color: #fff;
+  height: 30%;
+  width: 40%;
+  position: absolute;
+  border-radius: 2px;
+  border-color: #000;
+  border-width: 3px;
+  top: 170px;
+  left: 120px;
+}
+
+.playerInfo {
+  background-color: #fff;
+  position: relative;
+  height:240px;
+  width: 210px;
+  top: 30px;
+}
+
+.stat_info {
+  background-color: #fff;
+  height: 620px;
+  width: 900px;
+  position: absolute;
+  left: 220px;
+  top: 10px;
+}
+
+#player p{
+  margin-top: 2px;
+}
+
+#header_section {
+  text-align: center;
+  background-color: #fcb653; /*yellow*/
+  height: 160px !important;
+  width: 100%;
+  color: rgb(158,14,54); /*purple*/
+  font-weight: bold;
+}
+
+#header_section2 {
+  text-align: center;
+  background-color: #fcb653; /*yellow*/
+  height: 170px !important;
+  width: 100%;
+  color: rgb(158,14,54); /*purple*/
+  font-weight: bold;
+}
+
+#body_section {
+  padding-top: 30px;
+}
+
+.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+table {
+  margin-bottom: 10px;
+}
+
+#dataTable th, #dataTable td {
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid black;
+  padding: 6px;
+}
+
+button {
+  padding: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #fcb653;
+  color: rgb(158,14,54);
+  font-weight: bold;
+  border: 2px solid rgb(158,14,54);
+}
+
+button:hover {
+  background-color: rgb(158,14,54);
+  color: black;
+  font-weight: bold;
+  border: 2px solid black;
+}
+
+select {
+  padding: 2px;
+  color: rgb(158,14,54);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.tooltip {
+	position: absolute;
+	opacity:0.8;
+	z-index:1000;
+	text-align:left;
+	border-radius:4px;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+	padding:8px;
+	color:#fff;
+	background-color:#000;
+	font: 12px sans-serif;
+	max-width: 300px;
+}
+
+.bar {
+  fill: #69b3a2;
+}
+
+.bar:hover {
+  fill: #4d8074;
+}
+
+.displayNone {
+    display: none;
+}
+.displayBlock {
+   display: block;
+}
+.displayInlineBlock {
+   display: inline-block;
+}
+
+.fa-home {
+  color: rgb(158,14,54) !important; /* purple color */
+}
+
+.fa-home:hover {
+  cursor: pointer;
+  color: white !important;
+}
