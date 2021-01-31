@@ -11,4 +11,4 @@ Pour lancer le projet :
   
   4. Créez un nouveau projet avec pour nom "project" et chargez le fichier RDF "all_seasons-csv_latestVersion.ttl" comme dataset du projet
   
-  5. Ouvrez le fichier index.html et explorez les données liées aux joueurs de NBA.
+  5. Ouvrez le fichier index.html et explorez les données liées aux joueurs de la NBA.
