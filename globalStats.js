@@ -73,6 +73,7 @@ function printStat() {
   var query;
 
   if (res_season[1] == "les") {
+      window.isSearchable = false;
       window.workInProgressTable = false;
       if (res_stats[0] == "college") {
         window.workInProgressCollege = true;
@@ -354,6 +355,7 @@ function printStat() {
       }
   }
   else {
+    window.isSearchable = true;
     window.workInProgressTable = true;
     //Displaying data in table
     var element_table = document.getElementById("headerTable");
@@ -1511,6 +1513,24 @@ function handleDisplay() {
 
     $("#table_section").removeClass("displayNone");
     $("#table_section").addClass('displayBlock');
+
+    if (window.isSearchable) {
+      $("#search").removeClass("displayNone");
+      $("#search").addClass('displayBlock');
+    }
+    else {
+      $("#search").removeClass("displayBlock");
+      $("#search").addClass('displayNone');
+    }
+    var $rows = $('#dataTable tr');
+    $('#search').keyup(function() {
+        var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+
+        $rows.show().filter(function() {
+            var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+            return !~text.indexOf(val);
+        }).hide();
+    });
     if (window.workInProgressTable) {
       alert("Veuillez nous excuser, l'affichage des tableaux pour une saison est encore en cours de construction d'où une présentation encore peu esthétique.");
     }

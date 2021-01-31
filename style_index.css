@@ -1,0 +1,35 @@
+body {
+  background-image: url('nba_bg.jpg');
+}
+
+a {
+  background: #fcb653;
+  padding: 50px;
+  border-radius: 16px;
+  text-decoration: none;
+  color: rgb(158,14,54);
+  font-weight: bold;
+  font-size: 26px;
+  box-shadow: 2px 7px black;
+}
+
+a:hover {
+  cursor: pointer;
+  background: rgb(158,14,54);
+  color: #fcb653;
+}
+
+.container {
+  margin-top: 15%;
+  display: flex; /* or inline-flex */
+  /* justify-content: center; */
+  justify-content: space-between;
+}
+
+#header {
+  text-align: center;
+  color: black;
+  text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white;
+  font-weight: bold;
+  font-size: 30px;
+}

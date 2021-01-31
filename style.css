@@ -45,7 +45,7 @@ body {
 #header_section {
   text-align: center;
   background-color: #fcb653; /*yellow*/
-  height: 110px !important;
+  height: 160px !important;
   width: 100%;
   color: rgb(158,14,54); /*purple*/
   font-weight: bold;
@@ -58,7 +58,17 @@ body {
 .center {
   margin-left: auto;
   margin-right: auto;
-  margin: auto;
+}
+
+table {
+  margin-bottom: 10px;
+}
+
+#dataTable th, #dataTable td {
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid black;
+  padding: 6px;
 }
 
 button {
@@ -116,4 +126,13 @@ select {
 }
 .displayInlineBlock {
    display: inline-block;
+}
+
+.fa-home {
+  color: rgb(158,14,54) !important; /* purple color */
+}
+
+.fa-home:hover {
+  cursor: pointer;
+  color: white !important;
 }
