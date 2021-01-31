@@ -1,5 +1,5 @@
 # ProjetWS
-Projet de Web sémantique sur les performances NBA
+Projet de Web sémantique sur les performances de joueurs NBA
 
 
 Pour lancer le projet :
