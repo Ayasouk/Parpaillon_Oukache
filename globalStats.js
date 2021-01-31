@@ -1,5 +1,5 @@
 $(document).ready(function(){
-  var endpoint = "http://127.0.0.1:3030/nba_dataset/sparql";
+  var endpoint = "http://127.0.0.1:3030/project/sparql";
   //Load each season
   var query = `PREFIX : <http://project#>
 
@@ -66,7 +66,7 @@ function printStat() {
   season_selected = document.getElementById("season_select").options[document.getElementById('season_select').selectedIndex].value;
   var res_season = season_selected.split(" ");
 
-  var endpoint = "http://127.0.0.1:3030/nba_dataset/sparql";
+  var endpoint = "http://127.0.0.1:3030/project/sparql";
 
   var notStatsRDF = ["name", "college", "country", "draftYear", "draftRound", "draftNumber"];
   var notNumStat = ["college", "country", "draftYear", "draftRound", "draftNumber", "team"];
@@ -370,10 +370,7 @@ function printStat() {
     th_param.appendChild(th_param_txt);
     element_table.appendChild(th_param);
 
-    //var body_table = document.getElementById("bodyTable");
-    //while (body_table.firstChild) {
     //     body_table.removeChild(body_table.firstChild);
-    //}
     if (notStatsRDF.includes(res_stats[0])) {
       query = `PREFIX : <http://project#>
 
@@ -751,6 +748,9 @@ function displayResult(data) {
         let td_property = document.createElement("td");
         let td_object = document.createElement("td");
         let td_property_txt = document.createTextNode(res_space);
+        let att = document.createAttribute("style");
+        att.value = "text-align: left";
+        td_property.setAttributeNode(att);
         var td_object_txt;
 
         switch (head1)
@@ -881,14 +881,6 @@ function displayResultAllSeasons(data) {
   td_object.appendChild(td_object_txt);
   element_table.appendChild(td_object);
   window.dataGraph[data.results.bindings[0].index.value][2] = average;
-}
-
-function notGraphable_function(data) {
-  var element_table = document.getElementById("headerTable");
-  while (element_table.firstChild) {
-      element_table.removeChild(element_table.firstChild);
-  }
-  $("#errorParameterDisplayGraph").html("Can't load "+data+" as a graph for now");
 }
 
 function printScatterPlotGraphAllSeasons(param_text_x, param_text_y) {

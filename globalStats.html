@@ -9,91 +9,93 @@
   </head>
   <body>
 
-    <!-- Stats selector -->
-    <div>
-        <label for="stats_select" class="required">Statistique :</label>
-        <select id="stats_select" name="stats_select" >
-            <optgroup>
-                <option value="age,age" >Âge</option>
-                <option value="college,college" >Université</option>
-                <option value="country,country" >Pays</option>
-                <option value="weight,player_weight" >Poids</option>
-                <option value="height,player_height" >Taille</option>
-                <option value="team,team_abbreviation" >Équipe</option>
-                <option value="draftYear,draft_year" >Année de sélection</option>
-                <option value="draftRound,draft_round" >Tour de sélection</option>
-                <option value="draftNumber,draft_number" >Numéro de sélection</option>
-                <option value="gamesPlayed,gp" >Nombre de matchs joués</option>
-                <option value="pointsScoredAverage,pts" >Nombre moyen de points marqués</option>
-                <option value="reboundsAverage,reb" >Nombre moyen de rebonds</option>
-                <option value="assistsAverage,ast" >Nombre moyen de passes décisives</option>
-                <option value="netRating,net_rating" >Différentiel de points pour 100 possessions</option>
-                <option value="offensiveReboundsPercentage,oreb_pct" >Pourcentage de rebonds offensifs</option>
-                <option value="defensiveReboundsPercentage,dreb_pct" >Pourcentage de rebonds défensifs</option>
-                <option value="teamPlaysPercentage,usg_pct" >Pourcentage de jeux d'équipe</option>
-                <option value="shootingEfficiencyPercentage,ts_pct" >Pourcentage d'efficacité du tir</option>
-                <option value="assistsPercentage,ast_pct" >Pourcentage d'assistance aux jeux d'équipe</option>
-            </optgroup>
-        </select>
-        <label for="season_select" class="required">Saison :</label>
-        <select id="season_select" name="season_select" >
-            <optgroup id="season_options">
-              <option>Toutes les saisons</option>
-            </optgroup>
-        </select>
-        <button onclick="printStat()" id="stat_button" type="button">Afficher</button>
+    <div id="header_section" >
+      <!-- Stats selector -->
+      <div style="padding-top: 20px;">
+          <label for="stats_select" class="required">Statistique :</label>
+          <select id="stats_select" name="stats_select" style="margin-right: 10px;">
+              <optgroup>
+                  <option value="age,age" >Âge</option>
+                  <option value="college,college" >Université</option>
+                  <option value="country,country" >Pays</option>
+                  <option value="weight,player_weight" >Poids</option>
+                  <option value="height,player_height" >Taille</option>
+                  <option value="team,team_abbreviation" >Équipe</option>
+                  <option value="draftYear,draft_year" >Année de sélection</option>
+                  <option value="draftRound,draft_round" >Tour de sélection</option>
+                  <option value="draftNumber,draft_number" >Numéro de sélection</option>
+                  <option value="gamesPlayed,gp" >Nombre de matchs joués</option>
+                  <option value="pointsScoredAverage,pts" >Nombre moyen de points marqués</option>
+                  <option value="reboundsAverage,reb" >Nombre moyen de rebonds</option>
+                  <option value="assistsAverage,ast" >Nombre moyen de passes décisives</option>
+                  <option value="netRating,net_rating" >Différentiel de points pour 100 possessions</option>
+                  <option value="offensiveReboundsPercentage,oreb_pct" >Pourcentage de rebonds offensifs</option>
+                  <option value="defensiveReboundsPercentage,dreb_pct" >Pourcentage de rebonds défensifs</option>
+                  <option value="teamPlaysPercentage,usg_pct" >Pourcentage de jeux d'équipe</option>
+                  <option value="shootingEfficiencyPercentage,ts_pct" >Pourcentage d'efficacité du tir</option>
+                  <option value="assistsPercentage,ast_pct" >Pourcentage d'assistance aux jeux d'équipe</option>
+              </optgroup>
+          </select>
+          <label for="season_select" class="required">Saison :</label>
+          <select id="season_select" name="season_select" style="margin-right: 10px;">
+              <optgroup id="season_options">
+                <option>Toutes les saisons</option>
+              </optgroup>
+          </select>
+          <button onclick="printStat()" id="stat_button" type="button">Choisir</button>
+      </div>
+
+      <!-- Display selector -->
+      <div id="radio_div" class="displayNone" style="padding-left: 20px; padding-top: 5px;">
+        <form name="radio_value" onSubmit="return handleDisplay()">
+          <p>Affichage des données :
+            <input type="radio" id="display_graph" name="displayName" value="graph">
+            <label for="display_graph" style="color: rgb(96,96,96) !important;">Graphique</label>
+            <input type="radio" id="display_table" name="displayName" value="table">
+            <label for="display_table" style="color: rgb(96,96,96) !important;">Tableau</label>
+            <button type="submit" value="Afficher" style="margin-left: 10px;">Afficher</button>
+          </p>
+        </form>
+      </div>
     </div>
 
-    <div id="radio_div" class="displayNone">
-      <form name="radio_value" onSubmit="return handleDisplay()">
-        <p>Affichage des données :
-          <input type="radio" id="display_graph" name="displayName" value="graph">
-          <label for="display_graph">Graphique</label>
-          <input type="radio" id="display_table" name="displayName" value="table">
-          <label for="display_table">Tableau</label>
-          <input type="submit" value="Choisir">
-        </p>
-      </form>
-    </div>
+    <div id="body_section">
+      <!-- Message for mouseover and mouseclick -->
+      <h3 class="displayNone" id="forewordGraph"></h3>
 
-    <!-- Error message when choosing a parameter for which we can't have a graph for now -->
-    <h1 id="errorParameterDisplayGraph"></h1>
+      <!-- Graph section -->
+      <!-- Load d3.js -->
+      <script src="https://d3js.org/d3.v4.js"></script>
 
-    <!-- Message for mouseover and mouseclick -->
-    <h3 class="displayNone" id="forewordGraph"></h3>
-
-    <!-- Graph section -->
-    <!-- Load d3.js -->
-    <script src="https://d3js.org/d3.v4.js"></script>
-
-    <div id="graph_section" class="displayNone">
-      <!-- Create a table where the graph and the table will take place -->
-      <table>
-        <tr>
-          <td>
-            <div id="my_dataviz"></div>
-          </td>
-          <td>
-            <table id="my_datatable" style="border-collapse: collapse; text-align: center;">
-              <thead>
-                <tr id="my_headerTable"></tr>
-              </thead>
-              <tbody id="my_bodyTable" class="displayNone" style="border: 1px solid black; height: 400px; padding-right: 5px; overflow-y: scroll;"></tbody>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </div>
-
-    <div id="table_section" class="displayNone">
-      <!-- Stats table -->
-      <table id="dataTable" style="text-align: center;">
-        <thead>
-          <tr id="headerTable">
+      <div id="graph_section" class="displayNone">
+        <!-- Create a table where the graph and the table will take place -->
+        <table>
+          <tr>
+            <td>
+              <div id="my_dataviz"></div>
+            </td>
+            <td>
+              <table id="my_datatable" class="center" style="border-collapse: collapse; text-align: center;">
+                <thead>
+                  <tr id="my_headerTable"></tr>
+                </thead>
+                <tbody id="my_bodyTable" class="displayNone" style="border: 1px solid black; height: 400px; padding-right: 5px; overflow-y: scroll;"></tbody>
+              </table>
+            </td>
           </tr>
-        </thead>
-        <tbody id="bodyTable"></tbody>
-      </table>
+        </table>
+      </div>
+
+      <div id="table_section" class="displayNone">
+        <!-- Stats table -->
+        <table id="dataTable" class="center" style="text-align: center;">
+          <thead>
+            <tr id="headerTable">
+            </tr>
+          </thead>
+          <tbody id="bodyTable"></tbody>
+        </table>
+      </div>
     </div>
   </body>
 </html>
