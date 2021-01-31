@@ -33,7 +33,8 @@ ORDER BY asc(UCASE(str(?season)))`;
 
 function printStat() {
   window.isGraphable = [true, null];
-  $("#errorParameterAllSeasons").html("");
+  $("#errorParameterDisplayGraph").html("");
+  $("#forewordGraph").html("");
   $("svg").remove()
   let my_headerTable = document.getElementById("my_headerTable");
   while (my_headerTable.firstChild) {
@@ -49,6 +50,8 @@ function printStat() {
   $("#table_section").addClass('displayNone');
   $("#graph_section").removeClass("displayBlock");
   $("#graph_section").addClass('displayNone');
+  $("#forewordGraph").removeClass("displayBlock");
+  $("#forewordGraph").addClass('displayNone');
   $("#radio_div").removeClass("displayNone");
   $("#radio_div").addClass('displayBlock');
   $('input[name=displayName]').attr('checked',false);
@@ -88,6 +91,16 @@ function printStat() {
           }
           ORDER BY asc(UCASE(str(?team)))`;
         }
+        else if (res_stats[0] == "draftNumber") {
+          query = `PREFIX : <http://project#>
+          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+          SELECT ?name ?draft_number
+          WHERE {
+            ?name :draftNumber ?draft_number .
+          }
+          ORDER BY xsd:decimal(?draft_number)`;
+        }
         else {
           query = `PREFIX : <http://project#>
 
@@ -98,7 +111,6 @@ function printStat() {
           ORDER BY asc(UCASE(str(?`+res_stats[1]+`)))`;
         }
         $.ajax({
-          async: false,
           url: endpoint,
           dataType: 'json',
           data: {
@@ -114,6 +126,7 @@ function printStat() {
             setDataGraphAllSeasons = [];
             dataForHistogramAllSeasons = [];
             var occurs = 0;
+            var noneOrUndrafted = "";
             var head1 = data.head.vars[1]; //object
             $.each(data.results.bindings, function(index, bs) {
               let res = bs.name.value.split("http://project#");
@@ -137,45 +150,54 @@ function printStat() {
                   break;
                 case "draft_year":
                   val_string = bs.draft_year.value;
-                  if (!(setDataGraphAllSeasons.includes(val_string))) {
-                    if (setDataGraphAllSeasons.length != 0) {
-                      setDataGraphAllSeasons.push(occurs);
+                  if (val_string != "Undrafted") {
+                    if (!(setDataGraphAllSeasons.includes(val_string))) {
+                      if (setDataGraphAllSeasons.length != 0) {
+                        setDataGraphAllSeasons.push(occurs);
+                      }
+                      setDataGraphAllSeasons.push(val_string);
+                      occurs = 1;
                     }
-                    setDataGraphAllSeasons.push(val_string);
-                    occurs = 1;
+                    else {
+                      occurs++;
+                    }
+                    dataForHistogramAllSeasons.push([val_string, res_space]);
+                    noneOrUndrafted = "Undrafted";
                   }
-                  else {
-                    occurs++;
-                  }
-                  dataForHistogramAllSeasons.push([val_string, res_space]);
                   break;
                 case "draft_round":
                   val_string = bs.draft_round.value;
-                  if (!(setDataGraphAllSeasons.includes(val_string))) {
-                    if (setDataGraphAllSeasons.length != 0) {
-                      setDataGraphAllSeasons.push(occurs);
+                  if (val_string != "Undrafted") {
+                    if (!(setDataGraphAllSeasons.includes(val_string))) {
+                      if (setDataGraphAllSeasons.length != 0) {
+                        setDataGraphAllSeasons.push(occurs);
+                      }
+                      setDataGraphAllSeasons.push(val_string);
+                      occurs = 1;
                     }
-                    setDataGraphAllSeasons.push(val_string);
-                    occurs = 1;
+                    else {
+                      occurs++;
+                    }
+                    dataForHistogramAllSeasons.push([val_string, res_space]);
+                    noneOrUndrafted = "Undrafted";
                   }
-                  else {
-                    occurs++;
-                  }
-                  dataForHistogramAllSeasons.push([val_string, res_space]);
                   break;
                 case "draft_number":
                   val_string = bs.draft_number.value;
-                  if (!(setDataGraphAllSeasons.includes(val_string))) {
-                    if (setDataGraphAllSeasons.length != 0) {
-                      setDataGraphAllSeasons.push(occurs);
+                  if (val_string != "Undrafted") {
+                    if (!(setDataGraphAllSeasons.includes(val_string))) {
+                      if (setDataGraphAllSeasons.length != 0) {
+                        setDataGraphAllSeasons.push(occurs);
+                      }
+                      setDataGraphAllSeasons.push(val_string);
+                      occurs = 1;
                     }
-                    setDataGraphAllSeasons.push(val_string);
-                    occurs = 1;
+                    else {
+                      occurs++;
+                    }
+                    dataForHistogramAllSeasons.push([val_string, res_space]);
+                    noneOrUndrafted = "Undrafted";
                   }
-                  else {
-                    occurs++;
-                  }
-                  dataForHistogramAllSeasons.push([val_string, res_space]);
                   break;
                 case "team":
                   val_string = bs.team.value;
@@ -193,21 +215,30 @@ function printStat() {
                   break;
                 default: //college by default
                   val_string = bs.college.value;
-                  if (!(setDataGraphAllSeasons.includes(val_string))) {
-                    if (setDataGraphAllSeasons.length != 0) {
-                      setDataGraphAllSeasons.push(occurs);
+                  if (val_string != "None") {
+                    if (!(setDataGraphAllSeasons.includes(val_string))) {
+                      if (setDataGraphAllSeasons.length != 0) {
+                        setDataGraphAllSeasons.push(occurs);
+                      }
+                      setDataGraphAllSeasons.push(val_string);
+                      occurs = 1;
                     }
-                    setDataGraphAllSeasons.push(val_string);
-                    occurs = 1;
+                    else {
+                      occurs++;
+                    }
+                    dataForHistogramAllSeasons.push([val_string, res_space]);
+                    noneOrUndrafted = "None";
                   }
-                  else {
-                    occurs++;
-                  }
-                  dataForHistogramAllSeasons.push([val_string, res_space]);
                 }
             });
-            setDataGraphAllSeasons.push(occurs);
-            printBarPlotAllSeasons(param_text, dataForHistogramAllSeasons, setDataGraphAllSeasons);
+            let dataLengthMinusOne = setDataGraphAllSeasons.length - 1
+            if ((setDataGraphAllSeasons.indexOf("None") == dataLengthMinusOne) || setDataGraphAllSeasons.indexOf("Undrafted") == dataLengthMinusOne) {
+              console.log("None or Undrafted is the last element");
+            }
+            else {
+              setDataGraphAllSeasons.push(occurs);
+            }
+            printBarPlot(param_text, dataForHistogramAllSeasons, setDataGraphAllSeasons, noneOrUndrafted, "true");
           },
           error: displayError
         });
@@ -463,13 +494,6 @@ function printStat() {
                 }
                 dataForHistogram.push([val_rounded, res_space]);
                 break;
-              case "net_rating":
-                val_rounded = bs.net_rating.value;
-                if (!(setDataGraph.includes(val_rounded))) {
-                  setDataGraph.push(val_rounded);
-                }
-                dataForHistogram.push([val_rounded, res_space]);
-                break;
               case "oreb_pct":
                 val_rounded = bs.oreb_pct.value;
                 if (!(setDataGraph.includes(val_rounded))) {
@@ -520,7 +544,182 @@ function printStat() {
       });
     }
     else {
-      window.isGraphable = [false, res_stats[0]];
+      if (res_stats[0] == "netRating") {
+        window.isGraphable = [false, res_stats[0]];
+      }
+      else {
+        if (res_stats[0] == "team") {
+          query = `PREFIX : <http://project#>
+
+          SELECT DISTINCT ?name ?team
+          WHERE {
+            ?name :statistics
+            [
+              :team ?team;
+              :season "`+res_season[1]+`"
+            ]
+          }
+          ORDER BY asc(UCASE(str(?team)))`;
+        }
+        else if (res_stats[0] == "draftNumber") {
+          query = `PREFIX : <http://project#>
+          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+          SELECT ?name ?draft_number
+          WHERE {
+            ?name :draftNumber ?draft_number .
+            ?name :statistics
+            [
+              :season "`+res_season[1]+`"
+            ]
+          }
+          ORDER BY xsd:decimal(?draft_number)`;
+        }
+        else {
+          query = `PREFIX : <http://project#>
+
+          SELECT ?name ?`+res_stats[1]+`
+          WHERE {
+            ?name :`+res_stats[0]+` ?`+res_stats[1]+` .
+            ?name :statistics
+            [
+              :season "`+res_season[1]+`"
+            ]
+          }
+          ORDER BY asc(UCASE(str(?`+res_stats[1]+`)))`;
+        }
+        $.ajax({
+          url: endpoint,
+          dataType: 'json',
+          data: {
+            traditional: true,
+            queryLn: 'SPARQL',
+            query: query ,
+            limit: 'none',
+            infer: 'true',
+            Accept: 'application/sparql-results+json'
+          },
+          success: function(data) {
+            setDataGraph = [];
+            dataForHistogram = [];
+            var occurs = 0;
+            var noneOrUndrafted = "";
+            var head1 = data.head.vars[1]; //object
+            $.each(data.results.bindings, function(index, bs) {
+              let res = bs.name.value.split("http://project#");
+              let res_space = res[1].replace("_", " ");
+              let val_string;
+              switch (head1)
+              {
+                case "country":
+                  val_string = bs.country.value;
+                  if (!(setDataGraph.includes(val_string))) {
+                    if (setDataGraph.length != 0) {
+                      setDataGraph.push(occurs);
+                    }
+                    setDataGraph.push(val_string);
+                    occurs = 1;
+                  }
+                  else {
+                    occurs++;
+                  }
+                  dataForHistogram.push([val_string, res_space]);
+                  break;
+                case "draft_year":
+                  val_string = bs.draft_year.value;
+                  if (val_string != "Undrafted") {
+                    if (!(setDataGraph.includes(val_string))) {
+                      if (setDataGraph.length != 0) {
+                        setDataGraph.push(occurs);
+                      }
+                      setDataGraph.push(val_string);
+                      occurs = 1;
+                    }
+                    else {
+                      occurs++;
+                    }
+                    dataForHistogram.push([val_string, res_space]);
+                    noneOrUndrafted = "Undrafted";
+                  }
+                  break;
+                case "draft_round":
+                  val_string = bs.draft_round.value;
+                  if (val_string != "Undrafted") {
+                    if (!(setDataGraph.includes(val_string))) {
+                      if (setDataGraph.length != 0) {
+                        setDataGraph.push(occurs);
+                      }
+                      setDataGraph.push(val_string);
+                      occurs = 1;
+                    }
+                    else {
+                      occurs++;
+                    }
+                    dataForHistogram.push([val_string, res_space]);
+                    noneOrUndrafted = "Undrafted";
+                  }
+                  break;
+                case "draft_number":
+                  val_string = bs.draft_number.value;
+                  if (val_string != "Undrafted") {
+                    if (!(setDataGraph.includes(val_string))) {
+                      if (setDataGraph.length != 0) {
+                        setDataGraph.push(occurs);
+                      }
+                      setDataGraph.push(val_string);
+                      occurs = 1;
+                    }
+                    else {
+                      occurs++;
+                    }
+                    dataForHistogram.push([val_string, res_space]);
+                    noneOrUndrafted = "Undrafted";
+                  }
+                  break;
+                case "team":
+                  val_string = bs.team.value;
+                  if (!(setDataGraph.includes(val_string))) {
+                    if (setDataGraph.length != 0) {
+                      setDataGraph.push(occurs);
+                    }
+                    setDataGraph.push(val_string);
+                    occurs = 1;
+                  }
+                  else {
+                    occurs++;
+                  }
+                  dataForHistogram.push([val_string, res_space]);
+                  break;
+                default: //college by default
+                  val_string = bs.college.value;
+                  if (val_string != "None") {
+                    if (!(setDataGraph.includes(val_string))) {
+                      if (setDataGraph.length != 0) {
+                        setDataGraph.push(occurs);
+                      }
+                      setDataGraph.push(val_string);
+                      occurs = 1;
+                    }
+                    else {
+                      occurs++;
+                    }
+                    dataForHistogram.push([val_string, res_space]);
+                    noneOrUndrafted = "None";
+                  }
+                }
+            });
+            let dataLengthMinusOne = setDataGraph.length - 1
+            if ((setDataGraph.indexOf("None") == dataLengthMinusOne) || setDataGraph.indexOf("Undrafted") == dataLengthMinusOne) {
+              console.log("None or Undrafted is the last element");
+            }
+            else {
+              setDataGraph.push(occurs);
+            }
+            printBarPlot(param_text, dataForHistogram, setDataGraph, noneOrUndrafted, res_season[1]);
+          },
+          error: displayError
+        });
+      }
     }
   }
 }
@@ -677,15 +876,16 @@ function displayResultAllSeasons(data) {
   window.dataGraph[data.results.bindings[0].index.value][2] = average;
 }
 
-function notAllSeasons_function(data) {
+function notGraphable_function(data) {
   var element_table = document.getElementById("headerTable");
   while (element_table.firstChild) {
       element_table.removeChild(element_table.firstChild);
   }
-  $("#errorParameterAllSeasons").html("Can't load "+data+" for all seasons");
+  $("#errorParameterDisplayGraph").html("Can't load "+data+" as a graph for now");
 }
 
 function printScatterPlotGraphAllSeasons(param_text_x, param_text_y) {
+  $("#forewordGraph").html("N'hésitez pas à passer la souris sur les points pour plus de détails !");
   // set the dimensions and margins of the graph
   var margin = {top: 10, right: 30, bottom: 30, left: 60},
       width = 1000 - margin.left - margin.right,
@@ -780,6 +980,7 @@ function printScatterPlotGraphAllSeasons(param_text_x, param_text_y) {
     .append("circle")
       .attr("cx", function(d) { return x(d[1]) } )
       .attr("cy", function(d) { return y(d[2]) } )
+      .attr("cursor", "pointer")
       .attr("r", 6)
       .attr("fill", "#69b3a2")
       .on("mouseover", function(d) {
@@ -801,10 +1002,11 @@ function printScatterPlotGraphAllSeasons(param_text_x, param_text_y) {
 //dataForHistogram : liste de tuples [abscisse, ordonnee]
 //dataDistinct : liste de donnees (abscisse) distinctes (une sule fois, pour calculer le nombre de bins (rectangles) ,ecessaires)
 //currentSeason : saison actuelle (sous la forme "1997-98")
-function printHistogram(param_text_x, dataForHistogram, dataDistinct) {
+function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSeason) {
+  $("#forewordGraph").html("N'hésitez pas à passer la souris sur les barres ou cliquer dessus pour plus de détails !");
   // set the dimensions and margins of the graph
   var margin = {top: 30, right: 30, bottom: 30, left: 40},
-      width = 1200 - margin.left - margin.right,
+      width = 1500 - margin.left - margin.right,
       height = 520 - margin.top - margin.bottom;
   // append the svg object to the body of the page
   var svg = d3.select("#my_dataviz")
@@ -840,9 +1042,49 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct) {
 
   document.body.removeChild(textX);
 
+  //Bad solution for solving the problem of the last value being cut
+  switch (param_text_x)
+  {
+    case "Âge":
+      xMax += 2;
+      break;
+    case "Poids":
+      xMax += 2;
+      break;
+    case "Taille":
+      xMax += 2;
+      break;
+    case "Nombre moyen de points marqués":
+      xMax += 1;
+      break;
+    case "Nombre moyen de rebonds":
+      xMax += 1;
+      break;
+    case "Nombre moyen de passes décisives":
+      xMax += 1;
+      break;
+    case "Pourcentage de rebonds offensifs":
+      xMax += 0.02;
+      break;
+    case "Pourcentage de rebonds défensifs":
+      xMax += 0.005;
+      break;
+    case "Pourcentage de jeux d'équipe":
+      xMax += 0.002;
+      break;
+    case "Pourcentage d'efficacité du tir":
+      xMax += 0.005;
+      break;
+    case "Pourcentage d'assistance aux jeux d'équipe":
+      xMax += 0.002;
+      break;
+
+    default: //gamesPlayed by default
+      xMax += 1;
+  }
   //draw x axis
   var x = d3.scaleLinear()
-    .domain([xMin, xMax]) //last value not shown, NEED to extend domain but wisely TO MODIFY
+    .domain([xMin, xMax])
     .range([0, width]);
   svg
     .append("g")
@@ -909,6 +1151,7 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct) {
       .append("rect")
         .attr("class", "bar")
         .attr("x", 1)
+        .attr("cursor", "pointer")
         .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
         .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
         .attr("height", function(d) { return height - y(d.length); })
@@ -977,30 +1220,13 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct) {
       .text("Saison " + currentSeason);
 }
 
-function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
-  // console.log(dataDistinct);
-
-  //get the width in pixels of the name of the parameter to position it as we want on the x-axis
-  let text2X = document.createElement("span");
-  document.body.appendChild(text2X);
-
-  text2X.style.font = "times new roman";
-  text2X.style.fontSize = 16 + "px";
-  text2X.style.height = 'auto';
-  text2X.style.width = 'auto';
-  text2X.style.position = 'absolute';
-  text2X.style.whiteSpace = 'no-wrap';
-  text2X.innerHTML = param_text_x;
-
-  let widthX = Math.ceil(text2X.clientWidth);
-  formattedWidth = widthX;
-
-  document.body.removeChild(text2X);
-
+//soon
+function printHistogramNetRating(param_text_x, dataForHistogram, dataDistinct, currentSeason) {
+  $("#forewordGraph").html("N'hésitez pas à passer la souris sur les barres ou cliquer dessus pour plus de détails !");
   // set the dimensions and margins of the graph
-  var margin = {top: 30, right: formattedWidth+20, bottom: 100, left: 40},
-      width = 1200 - margin.left - margin.right,
-      height = 700 - margin.top - margin.bottom;
+  var margin = {top: 30, right: 30, bottom: 30, left: 40},
+      width = 1500 - margin.left - margin.right,
+      height = 520 - margin.top - margin.bottom;
   // append the svg object to the body of the page
   var svg = d3.select("#my_dataviz")
     .append("svg")
@@ -1009,16 +1235,14 @@ function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
     .append("g")
       .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
-  // append toolkit to svg object
+  // append toolkit to svg object (display nicely the name of the players and their corresponding data in a table)
   const div = d3.select("#my_dataviz").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
-
   // X axis
-  var data = [];
-  for (let i = 0; i < dataDistinct.length-1; i+=2) {
-    data.push([dataDistinct[i], dataDistinct[i+1]]);
-  }
+  //xMax and xMin for the domain
+  let xMax = d3.max(dataForHistogram, function(d) { return +d[0] });
+  let xMin = d3.min(dataForHistogram, function(d) { return +d[0] });
 
   //get the height in pixels of a text to position it as we want on the axis
   let textX = document.createElement("span");
@@ -1038,6 +1262,219 @@ function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
   document.body.removeChild(textX);
 
   //draw x axis
+  var x = d3.scaleLinear()
+    .domain([xMin, xMax])
+    .range([0, width]);
+  svg
+    .append("g")
+    .attr("transform", "translate(0," + height + ")")      // This controls the vertical position of the Axis
+    .call(d3.axisBottom(x));
+  svg.append("text")  //add x label
+    .attr("class", "x label")
+    .attr("text-anchor", "end")
+    .attr("x", width)
+    .attr("y", height + formattedHeight + 15)
+    .text(param_text_x);
+
+  // set the parameters for the histogram
+  let nbins = dataDistinct.length;
+  var histogram = d3.histogram()
+      .value(function(d) { return d[0]; })   // give the vector of value
+      .domain(x.domain())  // then the domain of the graphic
+      .thresholds(x.ticks(nbins)); // then the numbers of bins
+
+  // And apply this function to data to get the bins
+  var bins = histogram(dataForHistogram);
+
+  // Y axis
+  //get the width in pixels of the name of the parameter to position it as we want on the axis
+  let textY = document.createElement("span");
+  document.body.appendChild(textY);
+
+  textY.style.font = "times new roman";
+  textY.style.fontSize = 16 + "px";
+  textY.style.height = 'auto';
+  textY.style.width = 'auto';
+  textY.style.position = 'absolute';
+  textY.style.whiteSpace = 'no-wrap';
+  textY.innerHTML = "Nombre de joueurs";
+
+  let widthY = Math.ceil(textY.clientWidth);
+  formattedWidth = widthY;
+
+  document.body.removeChild(textY);
+
+  //yMax and yMin for the domain
+  let yMax = d3.max(bins, function(d) { return d.length; });
+  let yMin = d3.min(bins, function(d) { return d.length; });
+  let range4 = (yMax - yMin) / 4;
+  var y = d3.scaleLinear()
+    // .domain([0, yMax + range4])
+    .domain([0, yMax])
+    .range([ height, 0 ]);
+  svg.append("g")
+    .call(d3.axisLeft(y))
+  svg.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "end")
+    .attr("y", -formattedHeight)
+    .attr("x", formattedWidth + 5)
+    .attr("dy", ".75em")
+    .text("Nombre de joueurs");
+
+  // append the bar rectangles to the svg element
+  svg.selectAll(".bar")
+      .data(bins)
+      .enter()
+      .append("rect")
+        .attr("class", "bar")
+        .attr("x", 1)
+        .attr("cursor", "pointer")
+        .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
+        .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+        .attr("height", function(d) { return height - y(d.length); })
+        .on("mouseover", function(d) {
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            div.html(param_text_x + " : " + d.x0 + "<br>" + d.length + " joueur(s)")
+                .style("left", (d3.event.pageX + 10) + "px")
+                .style("top", (d3.event.pageY - 50) + "px");
+        })
+        .on("mouseout", function(d) {
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        })
+        .on("mouseup", function(d) {
+            //create table for specific info when clicking on a bin
+            let my_headerTable = document.getElementById("my_headerTable");
+            while (my_headerTable.firstChild) {
+                my_headerTable.removeChild(my_headerTable.firstChild);
+            }
+            let my_bodyTable = document.getElementById("my_bodyTable");
+            while (my_bodyTable.firstChild) {
+                my_bodyTable.removeChild(my_bodyTable.firstChild);
+            }
+            $("#my_bodyTable").removeClass("displayNone");
+            $("#my_bodyTable").addClass('displayBlock');
+            let th_my_data = document.createElement("th");
+            let att = document.createAttribute("style");
+            att.value = "border: 1px solid black; padding: 5px";
+            th_my_data.setAttributeNode(att);
+            // let th_my_data_txt = document.createTextNode("Joueur | " + param_text_x);
+            let th_my_data_txt = document.createTextNode("Joueur(s)");
+            th_my_data.appendChild(th_my_data_txt);
+            my_headerTable.appendChild(th_my_data);
+
+            d.forEach(function(element){
+              let tr_elem = document.createElement("tr");
+
+              let td1_elem = document.createElement("td");
+              att = document.createAttribute("style");
+              att.value = "border: 1px solid black; padding: 5px";
+              td1_elem.setAttributeNode(att);
+              let td1_elem_txt = document.createTextNode(element[1]);
+              td1_elem.appendChild(td1_elem_txt);
+              tr_elem.appendChild(td1_elem);
+
+              let td2_elem = document.createElement("td");
+              att = document.createAttribute("style");
+              att.value = "border: 1px solid black; padding: 5px";
+              td2_elem.setAttributeNode(att);
+              let td2_elem_txt = document.createTextNode(element[0]);
+              td2_elem.appendChild(td2_elem_txt);
+              tr_elem.appendChild(td2_elem);
+
+              my_bodyTable.appendChild(tr_elem);
+            })
+        });
+  svg.append("text") //display current season
+      .attr("x", (width / 2))
+      .attr("y", 0 - (margin.top / 2))
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("text-decoration", "underline")
+      .text("Saison " + currentSeason);
+}
+
+function printBarPlot(param_text_x, dataForHistogram, dataDistinct, noneOrUndrafted, isAllSeasons) {
+  let forewordData = "";
+  if (noneOrUndrafted == "None") {
+    forewordData = "<br>Les joueurs dont l'université n'est pas renseignée ne sont pas pris en compte, par souci de lisibilité";
+  }
+  if (noneOrUndrafted == "Undrafted") {
+    forewordData = "<br>Les joueurs non sélectionnés ne sont pas pris en compte, par souci de lisibilité";
+  }
+  $("#forewordGraph").html("N'hésitez pas à passer la souris sur les barres ou cliquer dessus pour plus de détails !"+forewordData);
+  if (isAllSeasons == "true") {
+    $("#forewordGraph").removeClass("displayNone");
+    $("#forewordGraph").addClass('displayBlock');
+  }
+  //get the width in pixels of the name of the parameter to position it as we want on the x-axis
+  let text2X = document.createElement("span");
+  document.body.appendChild(text2X);
+
+  text2X.style.font = "times new roman";
+  text2X.style.fontSize = 16 + "px";
+  text2X.style.height = 'auto';
+  text2X.style.width = 'auto';
+  text2X.style.position = 'absolute';
+  text2X.style.whiteSpace = 'no-wrap';
+  text2X.innerHTML = param_text_x;
+
+  let widthX = Math.ceil(text2X.clientWidth);
+  formattedWidthX = widthX;
+
+  document.body.removeChild(text2X);
+
+  // set the dimensions and margins of the graph
+  var margin = {top: 30, right: formattedWidthX+20, bottom: 100, left: 40},
+      width = 1600 - margin.left - margin.right,
+      height = 700 - margin.top - margin.bottom;
+  // append the svg object to the body of the page
+  var svg = d3.select("#my_dataviz")
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom + 50)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+  // append toolkit to svg object
+  const div = d3.select("#my_dataviz").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+  var data = [];
+  var varUSA;
+  for (let i = 0; i < dataDistinct.length-1; i+=2) {
+    if (dataDistinct[i] == "USA") {
+      varUSA = dataDistinct[i+1];
+    }
+    else {
+      data.push([dataDistinct[i], dataDistinct[i+1]]);
+    }
+  }
+
+  //get the height in pixels of a text to position it as we want on the axis
+  let textX = document.createElement("span");
+  document.body.appendChild(textX);
+
+  textX.style.font = "times new roman";
+  textX.style.fontSize = 16 + "px";
+  textX.style.height = 'auto';
+  textX.style.width = 'auto';
+  textX.style.position = 'absolute';
+  textX.style.whiteSpace = 'no-wrap';
+  textX.innerHTML = "bla";
+
+  let heightX = Math.ceil(textX.clientHeight);
+  formattedHeight = heightX;
+
+  document.body.removeChild(textX);
+
+  // X axis
+  //draw x axis
   var x = d3.scaleBand()
     .domain(data.map(function(d) { return d[0]; }))
     .range([0, width])
@@ -1047,11 +1484,12 @@ function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
     .attr("transform", "translate(0," + height + ")")      // This controls the vertical position of the Axis
     .call(d3.axisBottom(x))
     .selectAll("text")
-      .attr("transform", "translate(-20,20)rotate(-90)");
+      .style("text-anchor", "end")
+      .attr("transform", "translate(-5,"+5+")rotate(-45)");
   svg.append("text")  //add x label
     .attr("class", "x label")
     .attr("text-anchor", "end")
-    .attr("x", width + formattedWidth + 5)
+    .attr("x", width + formattedWidthX + 5)
     .attr("y", height)
     .text(param_text_x);
 
@@ -1096,6 +1534,7 @@ function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
         .attr("class", "bar")
         .attr("x", function(d) { return x(d[0]); })
         .attr("y", function(d) { return y(d[1]); })
+        .attr("cursor", "pointer")
         .attr("width", x.bandwidth())
         .attr("height", function(d) { return height - y(d[1]); })
         .attr("fill", "#69b3a2")
@@ -1148,6 +1587,64 @@ function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
               }
             })
         });
+  if (param_text_x == "Pays") {
+    svg.append("text")
+      .attr("x", (3 * width / 4))
+      .attr("y", -formattedHeight)
+      .attr("text-anchor", "middle")
+      .attr("cursor", "pointer")
+      .attr("stroke", "#69b3a2")
+      .style("font-size", "16px")
+      .style("color", "red")
+      .text("USA : " + varUSA + " joueurs")
+      .data(data)
+      .on("mouseup", function(d) {
+      //create table for specific info when clicking on a bin
+      let my_headerTable = document.getElementById("my_headerTable");
+      while (my_headerTable.firstChild) {
+        my_headerTable.removeChild(my_headerTable.firstChild);
+      }
+      let my_bodyTable = document.getElementById("my_bodyTable");
+      while (my_bodyTable.firstChild) {
+        my_bodyTable.removeChild(my_bodyTable.firstChild);
+      }
+      $("#my_bodyTable").removeClass("displayNone");
+      $("#my_bodyTable").addClass('displayBlock');
+      let th_my_data = document.createElement("th");
+      let att = document.createAttribute("style");
+      att.value = "border: 1px solid black; padding: 5px";
+      th_my_data.setAttributeNode(att);
+      let th_my_data_txt = document.createTextNode("USA");
+      th_my_data.appendChild(th_my_data_txt);
+      my_headerTable.appendChild(th_my_data);
+
+      dataForHistogram.forEach(function(element){
+        if (element[0] == "USA") {
+          let tr_elem = document.createElement("tr");
+
+          let td1_elem = document.createElement("td");
+          att = document.createAttribute("style");
+          att.value = "border: 1px solid black; padding: 5px";
+          td1_elem.setAttributeNode(att);
+          let td1_elem_txt = document.createTextNode(element[1]);
+          td1_elem.appendChild(td1_elem_txt);
+          tr_elem.appendChild(td1_elem);
+
+          my_bodyTable.appendChild(tr_elem);
+        }
+      })
+    });
+  }
+  if (isAllSeasons != "true") {
+    svg.append("text") //display current season
+        .attr("x", (width / 2))
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("text-decoration", "underline")
+        .text("Saison " + isAllSeasons);
+  }
+
 }
 
 function getRadioButtonValue(rbutton) {
@@ -1168,17 +1665,22 @@ function handleDisplay() {
     if (window.isGraphable[0]) {
       $("#graph_section").removeClass("displayNone");
       $("#graph_section").addClass('displayBlock');
+      $("#forewordGraph").removeClass("displayNone");
+      $("#forewordGraph").addClass('displayBlock');
     }
     else {
-      notAllSeasons_function(window.isGraphable[1]);
+      notGraphable_function(window.isGraphable[1]);
     }
   }
   if (choice == "table") {
     if (!(window.isGraphable[0])) {
-      $("#errorParameterAllSeasons").html("");
+      $("#errorParameterDisplayGraph").html("");
+      $("#forewordGraph").html("");
     }
     $("#graph_section").removeClass("displayBlock");
     $("#graph_section").addClass('displayNone');
+    $("#forewordGraph").removeClass("displayBlock");
+    $("#forewordGraph").addClass('displayNone');
 
     $("#table_section").removeClass("displayNone");
     $("#table_section").addClass('displayBlock');
