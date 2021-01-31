@@ -53,6 +53,8 @@ String.prototype.capitalize = function() {
 function chercherJoueur(data){
   //TODO: Mettre la majuscule après un apostrophe
 
+$("#player2").remove();
+// Chargement des données lié au joueur
   console.log("Joueur trouvé ! ");
   data = data.split(" ");
   for(i=0;i<data.length; i++){
@@ -62,6 +64,42 @@ function chercherJoueur(data){
   data = data.join("_");
   data = data.replace("'", "_");
   console.log(data);
+
+  // chargement des saisons d où le joueur a joué
+  var endpoint = "http://127.0.0.1:3030/nba_dataset/sparql";
+  //Load each season
+  var query = `PREFIX : <http://project#>
+
+  SELECT DISTINCT ?season
+  WHERE {
+      :`+data+` :statistics [
+      :season ?season
+      ]
+    }
+  ORDER BY asc(UCASE(str(?season)))`;
+    $.ajax({
+                url: endpoint,
+                dataType: 'json',
+                data: {
+                    traditional: true,
+                    queryLn: 'SPARQL',
+                    query: query ,
+                    limit: 'none',
+                    infer: 'true',
+                    Accept: 'application/sparql-results+json'
+                },
+                success: function(data){
+                    $("#season_options")
+                      .empty()
+                      .append('<option selected="selected" value="Toutes les saisons">Toutes les saisons</option>');
+                    $.each(data.results.bindings, function(index, bs) {
+                        var season_txt = "Saison " + bs.season.value;
+                        $('#season_options').append("<option value="+bs.season.value+">"+season_txt+"</option>");
+                    });
+                },
+                error: displayError
+        });
+
 
   var endpoint = "http://127.0.0.1:3030/nba_dataset/sparql";
   var queryPlayer = `PREFIX : <http://project#>
@@ -144,12 +182,12 @@ function displayResultPlayer(data) {
     $.each(data.results.bindings, function(index, bs) {
         console.log(bs);
         player.id="player2"
-        player.innerHTML = `<div id='name2'>name : `+bs.n.value+`</div><br>
-                            <div id='country'>country :`+bs.cou.value+`</div><br>
-                            <div id='college'>college : `+bs.col.value+`</div><br>
-                            <div id='dy'>draft year : `+bs.dy.value+`</div><br>
-                            <div id='dr'>draft round : `+bs.dr.value+`</div><br>
-                            <div id='dn'>draft number : `+bs.dn.value+`</div><br>
+        player.innerHTML = `<div id='name2'>Nom: `+bs.n.value+`</div><br>
+                            <div id='country'>Pays :`+bs.cou.value+`</div><br>
+                            <div id='college'>Université: `+bs.col.value+`</div><br>
+                            <div id='dy'>Année de sélection : `+bs.dy.value+`</div><br>
+                            <div id='dr'>Tour de sélection : `+bs.dr.value+`</div><br>
+                            <div id='dn'>Rang de sélection : `+bs.dn.value+`</div><br>
         `;
         $("#player_info").append(player);
         //$("body").append(JSON.stringify(bs) + "<hr/>")
@@ -188,6 +226,11 @@ function printStat(){
   var endpoint = "http://127.0.0.1:3030/nba_dataset/sparql";
 
   if (param_text=="Toutes statistiques"){
+    if(res_season=="Toutes les saisons"){
+      alert("Nous ne pouvons afficher toutes les statistiques seulement pour une saison donnée")
+    }
+    $("#graph_section").removeClass("displayBlock");
+    $("#graph_section").addClass('displayNone');
     var queryStats = `PREFIX : <http://project#>
 
       SELECT DISTINCT
@@ -228,24 +271,27 @@ function printStat(){
                           }
                           stats = document.createElement('div')
                           stats.id="stats"
-                          stats.innerHTML = `<div id='team'>Team : `+bs.team.value+`</div><br>
+                          stats.innerHTML = `<div id='team'>Equipe : `+bs.team.value+`</div><br>
                                               <div id='pts'>Points moyens :`+bs.pts.value+`</div><br>
                                               <div id='rb'>Rebonds : `+bs.rb.value+`</div><br>
-                                              <div id='as'>Assists: `+bs.as.value+`</div><br>
-                                              <div id='asp'>Assists percentage: `+bs.asp.value+`</div><br>
-                                              <div id='orb'>Offensive rebounds : `+bs.orb.value+`</div><br>
-                                              <div id='drb'>Defensive Rebounds: `+bs.drb.value+`</div><br>
-                                              <div id='s'>Shooting efficiency percentage: `+bs.s.value+`</div><br>
-                                              <div id='tp'>Team plays percentage : `+bs.tp.value+`</div><br>
-                                              <div id='tp'>Net rating : `+bs.net.value+`</div><br>
+                                              <div id='as'>Assistances: `+bs.as.value+`</div><br>
+                                              <div id='asp'>Pourcentage d'assistances: `+bs.asp.value+`</div><br>
+                                              <div id='orb'>Rebonds offensives : `+bs.orb.value+`</div><br>
+                                              <div id='drb'>Rebonds défensives: `+bs.drb.value+`</div><br>
+                                              <div id='s'>Pourcentage d'efficacité de shoot: `+bs.s.value+`</div><br>
+                                              <div id='tp'>Pourcentage de temps joué en équipe : `+bs.tp.value+`</div><br>
+                                              <div id='tp'>Différentiel de point pour 100 possessions : `+bs.net.value+`</div><br>
                           `;
                           $("#stat_info").append(stats)
+                          $("#graph_section").removeClass("displayBlock");
+                          $("#graph_section").addClass("displayNone");
                       });},
                       error: displayError
               });
   }
   else {
     // Créer le graphe selon la statistique
+    $("#stats").remove();
     console.log("test")
     if (true){
       $("#graph_section").removeClass("displayNone");
@@ -397,7 +443,7 @@ function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
   text2X.style.width = 'auto';
   text2X.style.position = 'absolute';
   text2X.style.whiteSpace = 'no-wrap';
-  text2X.innerHTML = param_text_x;
+  text2X.innerHTML = "Saison";
 
   let widthX = Math.ceil(text2X.clientWidth);
   formattedWidth = widthX;
@@ -411,8 +457,8 @@ function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
   }
   // set the dimensions and margins of the graph
   var margin = {top: 30, right: formattedWidth+20, bottom: 100, left: 40},
-      width = 1200 - margin.left - margin.right,
-      height = 700 - margin.top - margin.bottom;
+      width = 1000 - margin.left - margin.right,
+      height = 600 - margin.top - margin.bottom;
   // append the svg object to the body of the page
   var svg = d3.select("#my_dataviz")
     .append("svg")
@@ -460,11 +506,11 @@ function printBarPlotAllSeasons(param_text_x, dataForHistogram, dataDistinct) {
     .attr("transform", "translate(0," + height + ")")      // This controls the vertical position of the Axis
     .call(d3.axisBottom(x))
     .selectAll("text")
-      .attr("transform", "translate(-20,20)rotate(-90)");
+      .attr("transform", "translate(-20,20)rotate(-45)");
   svg.append("text")  //add x label
     .attr("class", "x label")
     .attr("text-anchor", "end")
-    .attr("x", width + formattedWidth + 5)
+    .attr("x", width + formattedWidth +5)
     .attr("y", height)
     .text("Saison");
 

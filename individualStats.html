@@ -10,48 +10,52 @@
     <script src="https://d3js.org/d3.v4.js"></script>
   </head>
   <body>
-    <h1 id="test">Rechercher un joueur </h1>
-    <form name="form" enctype="multipart/form-data" action="javascript:chercherJoueur(this.form.player_name.value)" method="post">
-      <div>
-        <label for="name">Nom du joueur : </label>
-        <input type="text" id="name" name="player_name">
-      </div>
-      <div class="button">
-        <button type="submit">Chercher le joueur</button>
-      </div>
-    </form>
-    <div id="select">
-        <label for="stats_select" class="required">Statistique :</label>
-        <select id="stats_select" name="stats_select" >
-            <optgroup>
-                <option value="Toutes statistiques">Toutes stastistiques</option>
-                <option value="age,age" >Âge</option>
-                <option value="college,college" >Université</option>
-                <option value="country,country" >Pays</option>
-                <option value="weight,player_weight" >Poids</option>
-                <option value="height,player_height" >Taille</option>
-                <option value="team,team_abbreviation" >Équipe</option>
-                <option value="draftYear,draft_year" >Année de sélection</option>
-                <option value="draftRound,draft_round" >Tour de sélection</option>
-                <option value="draftNumber,draft_number" >Numéro de sélection</option>
-                <option value="gamesPlayed,gp" >Nombre de matchs joués</option>
-                <option value="pointsScoredAverage,pts" >Nombre moyen de points marqués</option>
-                <option value="reboundsAverage,reb" >Nombre moyen de rebonds</option>
-                <option value="assistsAverage,ast" >Nombre moyen de passes décisives</option>
-                <option value="netRating,net_rating" >Différentiel de points pour 100 possessions</option>
-                <option value="offensiveReboundsPercentage,oreb_pct" >Pourcentage de rebonds offensifs</option>
-                <option value="defensiveReboundsPercentage,dreb_pct" >Pourcentage de rebonds défensifs</option>
-                <option value="teamPlaysPercentage,usg_pct" >Pourcentage de jeux d'équipe</option>
-                <option value="shootingEfficiencyPercentage,ts_pct" >Pourcentage d'efficacité du tir</option>
-                <option value="assistsPercentage,ast_pct" >Pourcentage d'assistance aux jeux d'équipe</option>
-            </optgroup>
-        </select>
-        <label for="season_select" class="required">Saison :</label>
-        <select id="season_select" name="season_select" >
-            <optgroup id="season_options">
-            </optgroup>
-        </select>
-        <button onclick="printStat()" id="stat_button" type="button">Afficher</button>
+    <div id="header_section2">
+      <div style="padding-top:1px">
+        <h1 id="test">Rechercher un joueur </h1>
+        <form name="form" enctype="multipart/form-data" action="javascript:chercherJoueur(this.form.player_name.value)" method="post">
+          <div>
+            <label for="name">Nom du joueur : </label>
+            <input type="text" id="name" name="player_name">
+          </div>
+          <!--<div class="button">-->
+            <button type="submit" class="button">Chercher le joueur</button>
+          <!-- </div> -->
+        </form>
+        <div id="select">
+            <label for="stats_select" class="required">Statistique :</label>
+            <select id="stats_select" name="stats_select">
+                <optgroup>
+                    <option value="Toutes statistiques">Toutes statistiques</option>
+                    <option value="age,age" >Âge</option>
+                    <option value="college,college" >Université</option>
+                    <option value="country,country" >Pays</option>
+                    <option value="weight,player_weight" >Poids</option>
+                    <option value="height,player_height" >Taille</option>
+                    <option value="team,team_abbreviation" >Équipe</option>
+                    <option value="draftYear,draft_year" >Année de sélection</option>
+                    <option value="draftRound,draft_round" >Tour de sélection</option>
+                    <option value="draftNumber,draft_number" >Numéro de sélection</option>
+                    <option value="gamesPlayed,gp" >Nombre de matchs joués</option>
+                    <option value="pointsScoredAverage,pts" >Nombre moyen de points marqués</option>
+                    <option value="reboundsAverage,reb" >Nombre moyen de rebonds</option>
+                    <option value="assistsAverage,ast" >Nombre moyen de passes décisives</option>
+                    <option value="netRating,net_rating" >Différentiel de points pour 100 possessions</option>
+                    <option value="offensiveReboundsPercentage,oreb_pct" >Pourcentage de rebonds offensifs</option>
+                    <option value="defensiveReboundsPercentage,dreb_pct" >Pourcentage de rebonds défensifs</option>
+                    <option value="teamPlaysPercentage,usg_pct" >Pourcentage de jeux d'équipe</option>
+                    <option value="shootingEfficiencyPercentage,ts_pct" >Pourcentage d'efficacité du tir</option>
+                    <option value="assistsPercentage,ast_pct" >Pourcentage d'assistance aux jeux d'équipe</option>
+                </optgroup>
+            </select>
+            <label for="season_select" class="required">Saison :</label>
+            <select id="season_select" name="season_select">
+                <optgroup id="season_options">
+                </optgroup>
+            </select>
+            <button onclick="printStat()" id="stat_button" type="button">Afficher les données</button>
+        </div>
+     </div>
     </div>
     <div id="player" class="player">
       <div id="player_info" class="playerInfo">

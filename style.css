@@ -13,11 +13,11 @@ body {
   background-color: #fff;
   height: 30%;
   width: 40%;
-  position:'relative';
+  position: absolute;
   border-radius: 2px;
   border-color: #000;
   border-width: 3px;
-  top: 100px;
+  top: 170px;
   left: 120px;
 }
 
@@ -35,7 +35,7 @@ body {
   width: 900px;
   position: absolute;
   left: 220px;
-  top: 170px;
+  top: 10px;
 }
 
 #player p{
@@ -46,6 +46,15 @@ body {
   text-align: center;
   background-color: #fcb653; /*yellow*/
   height: 160px !important;
+  width: 100%;
+  color: rgb(158,14,54); /*purple*/
+  font-weight: bold;
+}
+
+#header_section2 {
+  text-align: center;
+  background-color: #fcb653; /*yellow*/
+  height: 170px !important;
   width: 100%;
   color: rgb(158,14,54); /*purple*/
   font-weight: bold;
