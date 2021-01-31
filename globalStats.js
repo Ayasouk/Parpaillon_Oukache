@@ -32,7 +32,7 @@ ORDER BY asc(UCASE(str(?season)))`;
 });
 
 function printStat() {
-  window.isGraphable = [true, null];
+  window.workInProgressCollege = false;
   $("#errorParameterDisplayGraph").html("");
   $("#forewordGraph").html("");
   $("svg").remove()
@@ -70,10 +70,13 @@ function printStat() {
 
   var notStatsRDF = ["name", "college", "country", "draftYear", "draftRound", "draftNumber"];
   var notNumStat = ["college", "country", "draftYear", "draftRound", "draftNumber", "team"];
-  var notHistogram = ["college", "country","draftYear", "draftRound", "draftNumber", "team", "netRating"];
   var query;
 
   if (res_season[1] == "les") {
+      window.workInProgressTable = false;
+      if (res_stats[0] == "college") {
+        window.workInProgressCollege = true;
+      }
       if (notNumStat.includes(res_stats[0])) {
         $("#radio_div").removeClass("displayBlock");
         $("#radio_div").addClass('displayNone');
@@ -351,6 +354,7 @@ function printStat() {
       }
   }
   else {
+    window.workInProgressTable = true;
     //Displaying data in table
     var element_table = document.getElementById("headerTable");
     while (element_table.firstChild) {
@@ -412,7 +416,7 @@ function printStat() {
     });
 
     // Displaying data as graph
-    if (!(notHistogram.includes(res_stats[0]))) {
+    if (!(notNumStat.includes(res_stats[0]))) {
       query2 = `PREFIX : <http://project#>
       PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
@@ -445,6 +449,7 @@ function printStat() {
             let res = bs.name.value.split("http://project#");
             let res_space = res[1].replace("_", " ");
             let val_rounded;
+            console.log(head1);
             switch (head1)
             {
               case "age":
@@ -529,6 +534,13 @@ function printStat() {
                 }
                 dataForHistogram.push([val_rounded, res_space]);
                 break;
+              case "net_rating":
+                val_rounded = bs.net_rating.value;
+                if (!(setDataGraph.includes(val_rounded))) {
+                  setDataGraph.push(val_rounded);
+                }
+                dataForHistogram.push([val_rounded, res_space]);
+                break;
 
               default: //gamesPlayed by default
                 val_rounded = bs.gp.value;
@@ -544,182 +556,177 @@ function printStat() {
       });
     }
     else {
-      if (res_stats[0] == "netRating") {
-        window.isGraphable = [false, res_stats[0]];
+      if (res_stats[0] == "team") {
+        query = `PREFIX : <http://project#>
+
+        SELECT DISTINCT ?name ?team
+        WHERE {
+          ?name :statistics
+          [
+            :team ?team;
+            :season "`+res_season[1]+`"
+          ]
+        }
+        ORDER BY asc(UCASE(str(?team)))`;
+      }
+      else if (res_stats[0] == "draftNumber") {
+        query = `PREFIX : <http://project#>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+        SELECT ?name ?draft_number
+        WHERE {
+          ?name :draftNumber ?draft_number .
+          ?name :statistics
+          [
+            :season "`+res_season[1]+`"
+          ]
+        }
+        ORDER BY xsd:decimal(?draft_number)`;
       }
       else {
-        if (res_stats[0] == "team") {
-          query = `PREFIX : <http://project#>
+        query = `PREFIX : <http://project#>
 
-          SELECT DISTINCT ?name ?team
-          WHERE {
-            ?name :statistics
-            [
-              :team ?team;
-              :season "`+res_season[1]+`"
-            ]
-          }
-          ORDER BY asc(UCASE(str(?team)))`;
+        SELECT ?name ?`+res_stats[1]+`
+        WHERE {
+          ?name :`+res_stats[0]+` ?`+res_stats[1]+` .
+          ?name :statistics
+          [
+            :season "`+res_season[1]+`"
+          ]
         }
-        else if (res_stats[0] == "draftNumber") {
-          query = `PREFIX : <http://project#>
-          PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-          SELECT ?name ?draft_number
-          WHERE {
-            ?name :draftNumber ?draft_number .
-            ?name :statistics
-            [
-              :season "`+res_season[1]+`"
-            ]
-          }
-          ORDER BY xsd:decimal(?draft_number)`;
-        }
-        else {
-          query = `PREFIX : <http://project#>
-
-          SELECT ?name ?`+res_stats[1]+`
-          WHERE {
-            ?name :`+res_stats[0]+` ?`+res_stats[1]+` .
-            ?name :statistics
-            [
-              :season "`+res_season[1]+`"
-            ]
-          }
-          ORDER BY asc(UCASE(str(?`+res_stats[1]+`)))`;
-        }
-        $.ajax({
-          url: endpoint,
-          dataType: 'json',
-          data: {
-            traditional: true,
-            queryLn: 'SPARQL',
-            query: query ,
-            limit: 'none',
-            infer: 'true',
-            Accept: 'application/sparql-results+json'
-          },
-          success: function(data) {
-            setDataGraph = [];
-            dataForHistogram = [];
-            var occurs = 0;
-            var noneOrUndrafted = "";
-            var head1 = data.head.vars[1]; //object
-            $.each(data.results.bindings, function(index, bs) {
-              let res = bs.name.value.split("http://project#");
-              let res_space = res[1].replace("_", " ");
-              let val_string;
-              switch (head1)
-              {
-                case "country":
-                  val_string = bs.country.value;
-                  if (!(setDataGraph.includes(val_string))) {
-                    if (setDataGraph.length != 0) {
-                      setDataGraph.push(occurs);
-                    }
-                    setDataGraph.push(val_string);
-                    occurs = 1;
-                  }
-                  else {
-                    occurs++;
-                  }
-                  dataForHistogram.push([val_string, res_space]);
-                  break;
-                case "draft_year":
-                  val_string = bs.draft_year.value;
-                  if (val_string != "Undrafted") {
-                    if (!(setDataGraph.includes(val_string))) {
-                      if (setDataGraph.length != 0) {
-                        setDataGraph.push(occurs);
-                      }
-                      setDataGraph.push(val_string);
-                      occurs = 1;
-                    }
-                    else {
-                      occurs++;
-                    }
-                    dataForHistogram.push([val_string, res_space]);
-                    noneOrUndrafted = "Undrafted";
-                  }
-                  break;
-                case "draft_round":
-                  val_string = bs.draft_round.value;
-                  if (val_string != "Undrafted") {
-                    if (!(setDataGraph.includes(val_string))) {
-                      if (setDataGraph.length != 0) {
-                        setDataGraph.push(occurs);
-                      }
-                      setDataGraph.push(val_string);
-                      occurs = 1;
-                    }
-                    else {
-                      occurs++;
-                    }
-                    dataForHistogram.push([val_string, res_space]);
-                    noneOrUndrafted = "Undrafted";
-                  }
-                  break;
-                case "draft_number":
-                  val_string = bs.draft_number.value;
-                  if (val_string != "Undrafted") {
-                    if (!(setDataGraph.includes(val_string))) {
-                      if (setDataGraph.length != 0) {
-                        setDataGraph.push(occurs);
-                      }
-                      setDataGraph.push(val_string);
-                      occurs = 1;
-                    }
-                    else {
-                      occurs++;
-                    }
-                    dataForHistogram.push([val_string, res_space]);
-                    noneOrUndrafted = "Undrafted";
-                  }
-                  break;
-                case "team":
-                  val_string = bs.team.value;
-                  if (!(setDataGraph.includes(val_string))) {
-                    if (setDataGraph.length != 0) {
-                      setDataGraph.push(occurs);
-                    }
-                    setDataGraph.push(val_string);
-                    occurs = 1;
-                  }
-                  else {
-                    occurs++;
-                  }
-                  dataForHistogram.push([val_string, res_space]);
-                  break;
-                default: //college by default
-                  val_string = bs.college.value;
-                  if (val_string != "None") {
-                    if (!(setDataGraph.includes(val_string))) {
-                      if (setDataGraph.length != 0) {
-                        setDataGraph.push(occurs);
-                      }
-                      setDataGraph.push(val_string);
-                      occurs = 1;
-                    }
-                    else {
-                      occurs++;
-                    }
-                    dataForHistogram.push([val_string, res_space]);
-                    noneOrUndrafted = "None";
-                  }
-                }
-            });
-            let dataLengthMinusOne = setDataGraph.length - 1
-            if ((setDataGraph.indexOf("None") == dataLengthMinusOne) || setDataGraph.indexOf("Undrafted") == dataLengthMinusOne) {
-              console.log("None or Undrafted is the last element");
-            }
-            else {
-              setDataGraph.push(occurs);
-            }
-            printBarPlot(param_text, dataForHistogram, setDataGraph, noneOrUndrafted, res_season[1]);
-          },
-          error: displayError
-        });
+        ORDER BY asc(UCASE(str(?`+res_stats[1]+`)))`;
       }
+      $.ajax({
+        url: endpoint,
+        dataType: 'json',
+        data: {
+          traditional: true,
+          queryLn: 'SPARQL',
+          query: query ,
+          limit: 'none',
+          infer: 'true',
+          Accept: 'application/sparql-results+json'
+        },
+        success: function(data) {
+          setDataGraph = [];
+          dataForHistogram = [];
+          var occurs = 0;
+          var noneOrUndrafted = "";
+          var head1 = data.head.vars[1]; //object
+          $.each(data.results.bindings, function(index, bs) {
+            let res = bs.name.value.split("http://project#");
+            let res_space = res[1].replace("_", " ");
+            let val_string;
+            switch (head1)
+            {
+              case "country":
+              val_string = bs.country.value;
+              if (!(setDataGraph.includes(val_string))) {
+                if (setDataGraph.length != 0) {
+                  setDataGraph.push(occurs);
+                }
+                setDataGraph.push(val_string);
+                occurs = 1;
+              }
+              else {
+                occurs++;
+              }
+              dataForHistogram.push([val_string, res_space]);
+              break;
+              case "draft_year":
+              val_string = bs.draft_year.value;
+              if (val_string != "Undrafted") {
+                if (!(setDataGraph.includes(val_string))) {
+                  if (setDataGraph.length != 0) {
+                    setDataGraph.push(occurs);
+                  }
+                  setDataGraph.push(val_string);
+                  occurs = 1;
+                }
+                else {
+                  occurs++;
+                }
+                dataForHistogram.push([val_string, res_space]);
+                noneOrUndrafted = "Undrafted";
+              }
+              break;
+              case "draft_round":
+              val_string = bs.draft_round.value;
+              if (val_string != "Undrafted") {
+                if (!(setDataGraph.includes(val_string))) {
+                  if (setDataGraph.length != 0) {
+                    setDataGraph.push(occurs);
+                  }
+                  setDataGraph.push(val_string);
+                  occurs = 1;
+                }
+                else {
+                  occurs++;
+                }
+                dataForHistogram.push([val_string, res_space]);
+                noneOrUndrafted = "Undrafted";
+              }
+              break;
+              case "draft_number":
+              val_string = bs.draft_number.value;
+              if (val_string != "Undrafted") {
+                if (!(setDataGraph.includes(val_string))) {
+                  if (setDataGraph.length != 0) {
+                    setDataGraph.push(occurs);
+                  }
+                  setDataGraph.push(val_string);
+                  occurs = 1;
+                }
+                else {
+                  occurs++;
+                }
+                dataForHistogram.push([val_string, res_space]);
+                noneOrUndrafted = "Undrafted";
+              }
+              break;
+              case "team":
+              val_string = bs.team.value;
+              if (!(setDataGraph.includes(val_string))) {
+                if (setDataGraph.length != 0) {
+                  setDataGraph.push(occurs);
+                }
+                setDataGraph.push(val_string);
+                occurs = 1;
+              }
+              else {
+                occurs++;
+              }
+              dataForHistogram.push([val_string, res_space]);
+              break;
+              default: //college by default
+              val_string = bs.college.value;
+              if (val_string != "None") {
+                if (!(setDataGraph.includes(val_string))) {
+                  if (setDataGraph.length != 0) {
+                    setDataGraph.push(occurs);
+                  }
+                  setDataGraph.push(val_string);
+                  occurs = 1;
+                }
+                else {
+                  occurs++;
+                }
+                dataForHistogram.push([val_string, res_space]);
+                noneOrUndrafted = "None";
+              }
+            }
+          });
+          let dataLengthMinusOne = setDataGraph.length - 1
+          if ((setDataGraph.indexOf("None") == dataLengthMinusOne) || setDataGraph.indexOf("Undrafted") == dataLengthMinusOne) {
+            console.log("None or Undrafted is the last element");
+          }
+          else {
+            setDataGraph.push(occurs);
+          }
+          printBarPlot(param_text, dataForHistogram, setDataGraph, noneOrUndrafted, res_season[1]);
+        },
+        error: displayError
+      });
     }
   }
 }
@@ -980,7 +987,6 @@ function printScatterPlotGraphAllSeasons(param_text_x, param_text_y) {
     .append("circle")
       .attr("cx", function(d) { return x(d[1]) } )
       .attr("cy", function(d) { return y(d[2]) } )
-      .attr("cursor", "pointer")
       .attr("r", 6)
       .attr("fill", "#69b3a2")
       .on("mouseover", function(d) {
@@ -1024,6 +1030,9 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
   //xMax and xMin for the domain
   let xMax = d3.max(dataForHistogram, function(d) { return +d[0] });
   let xMin = d3.min(dataForHistogram, function(d) { return +d[0] });
+  console.log(dataForHistogram);
+  console.log(xMin);
+  console.log(xMax);
 
   //get the height in pixels of a text to position it as we want on the axis
   let textX = document.createElement("span");
@@ -1077,6 +1086,10 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
       break;
     case "Pourcentage d'assistance aux jeux d'équipe":
       xMax += 0.002;
+      break;
+    case "Différentiel de points pour 100 possessions":
+      xMax += 2;
+      xMin -= 2;
       break;
 
     default: //gamesPlayed by default
@@ -1220,185 +1233,13 @@ function printHistogram(param_text_x, dataForHistogram, dataDistinct, currentSea
       .text("Saison " + currentSeason);
 }
 
-//soon
-function printHistogramNetRating(param_text_x, dataForHistogram, dataDistinct, currentSeason) {
-  $("#forewordGraph").html("N'hésitez pas à passer la souris sur les barres ou cliquer dessus pour plus de détails !");
-  // set the dimensions and margins of the graph
-  var margin = {top: 30, right: 30, bottom: 30, left: 40},
-      width = 1500 - margin.left - margin.right,
-      height = 520 - margin.top - margin.bottom;
-  // append the svg object to the body of the page
-  var svg = d3.select("#my_dataviz")
-    .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom + 50)
-    .append("g")
-      .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-  // append toolkit to svg object (display nicely the name of the players and their corresponding data in a table)
-  const div = d3.select("#my_dataviz").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
-  // X axis
-  //xMax and xMin for the domain
-  let xMax = d3.max(dataForHistogram, function(d) { return +d[0] });
-  let xMin = d3.min(dataForHistogram, function(d) { return +d[0] });
-
-  //get the height in pixels of a text to position it as we want on the axis
-  let textX = document.createElement("span");
-  document.body.appendChild(textX);
-
-  textX.style.font = "times new roman";
-  textX.style.fontSize = 16 + "px";
-  textX.style.height = 'auto';
-  textX.style.width = 'auto';
-  textX.style.position = 'absolute';
-  textX.style.whiteSpace = 'no-wrap';
-  textX.innerHTML = "bla";
-
-  let heightX = Math.ceil(textX.clientHeight);
-  formattedHeight = heightX;
-
-  document.body.removeChild(textX);
-
-  //draw x axis
-  var x = d3.scaleLinear()
-    .domain([xMin, xMax])
-    .range([0, width]);
-  svg
-    .append("g")
-    .attr("transform", "translate(0," + height + ")")      // This controls the vertical position of the Axis
-    .call(d3.axisBottom(x));
-  svg.append("text")  //add x label
-    .attr("class", "x label")
-    .attr("text-anchor", "end")
-    .attr("x", width)
-    .attr("y", height + formattedHeight + 15)
-    .text(param_text_x);
-
-  // set the parameters for the histogram
-  let nbins = dataDistinct.length;
-  var histogram = d3.histogram()
-      .value(function(d) { return d[0]; })   // give the vector of value
-      .domain(x.domain())  // then the domain of the graphic
-      .thresholds(x.ticks(nbins)); // then the numbers of bins
-
-  // And apply this function to data to get the bins
-  var bins = histogram(dataForHistogram);
-
-  // Y axis
-  //get the width in pixels of the name of the parameter to position it as we want on the axis
-  let textY = document.createElement("span");
-  document.body.appendChild(textY);
-
-  textY.style.font = "times new roman";
-  textY.style.fontSize = 16 + "px";
-  textY.style.height = 'auto';
-  textY.style.width = 'auto';
-  textY.style.position = 'absolute';
-  textY.style.whiteSpace = 'no-wrap';
-  textY.innerHTML = "Nombre de joueurs";
-
-  let widthY = Math.ceil(textY.clientWidth);
-  formattedWidth = widthY;
-
-  document.body.removeChild(textY);
-
-  //yMax and yMin for the domain
-  let yMax = d3.max(bins, function(d) { return d.length; });
-  let yMin = d3.min(bins, function(d) { return d.length; });
-  let range4 = (yMax - yMin) / 4;
-  var y = d3.scaleLinear()
-    // .domain([0, yMax + range4])
-    .domain([0, yMax])
-    .range([ height, 0 ]);
-  svg.append("g")
-    .call(d3.axisLeft(y))
-  svg.append("text")
-    .attr("class", "y label")
-    .attr("text-anchor", "end")
-    .attr("y", -formattedHeight)
-    .attr("x", formattedWidth + 5)
-    .attr("dy", ".75em")
-    .text("Nombre de joueurs");
-
-  // append the bar rectangles to the svg element
-  svg.selectAll(".bar")
-      .data(bins)
-      .enter()
-      .append("rect")
-        .attr("class", "bar")
-        .attr("x", 1)
-        .attr("cursor", "pointer")
-        .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
-        .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
-        .attr("height", function(d) { return height - y(d.length); })
-        .on("mouseover", function(d) {
-            div.transition()
-                .duration(200)
-                .style("opacity", .9);
-            div.html(param_text_x + " : " + d.x0 + "<br>" + d.length + " joueur(s)")
-                .style("left", (d3.event.pageX + 10) + "px")
-                .style("top", (d3.event.pageY - 50) + "px");
-        })
-        .on("mouseout", function(d) {
-            div.transition()
-                .duration(500)
-                .style("opacity", 0);
-        })
-        .on("mouseup", function(d) {
-            //create table for specific info when clicking on a bin
-            let my_headerTable = document.getElementById("my_headerTable");
-            while (my_headerTable.firstChild) {
-                my_headerTable.removeChild(my_headerTable.firstChild);
-            }
-            let my_bodyTable = document.getElementById("my_bodyTable");
-            while (my_bodyTable.firstChild) {
-                my_bodyTable.removeChild(my_bodyTable.firstChild);
-            }
-            $("#my_bodyTable").removeClass("displayNone");
-            $("#my_bodyTable").addClass('displayBlock');
-            let th_my_data = document.createElement("th");
-            let att = document.createAttribute("style");
-            att.value = "border: 1px solid black; padding: 5px";
-            th_my_data.setAttributeNode(att);
-            // let th_my_data_txt = document.createTextNode("Joueur | " + param_text_x);
-            let th_my_data_txt = document.createTextNode("Joueur(s)");
-            th_my_data.appendChild(th_my_data_txt);
-            my_headerTable.appendChild(th_my_data);
-
-            d.forEach(function(element){
-              let tr_elem = document.createElement("tr");
-
-              let td1_elem = document.createElement("td");
-              att = document.createAttribute("style");
-              att.value = "border: 1px solid black; padding: 5px";
-              td1_elem.setAttributeNode(att);
-              let td1_elem_txt = document.createTextNode(element[1]);
-              td1_elem.appendChild(td1_elem_txt);
-              tr_elem.appendChild(td1_elem);
-
-              let td2_elem = document.createElement("td");
-              att = document.createAttribute("style");
-              att.value = "border: 1px solid black; padding: 5px";
-              td2_elem.setAttributeNode(att);
-              let td2_elem_txt = document.createTextNode(element[0]);
-              td2_elem.appendChild(td2_elem_txt);
-              tr_elem.appendChild(td2_elem);
-
-              my_bodyTable.appendChild(tr_elem);
-            })
-        });
-  svg.append("text") //display current season
-      .attr("x", (width / 2))
-      .attr("y", 0 - (margin.top / 2))
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .style("text-decoration", "underline")
-      .text("Saison " + currentSeason);
-}
-
 function printBarPlot(param_text_x, dataForHistogram, dataDistinct, noneOrUndrafted, isAllSeasons) {
+  if (param_text_x == "Université" && window.workInProgressCollege) {
+    alert("Veuillez nous excuser, l'affichage des universités sous forme de graphe est encore en cours de construction d'où une présentation encore peu lisible.");
+  }
+  if (param_text_x == "Université" && !window.workInProgressCollege) {
+    window.workInProgressCollege = true;
+  }
   let forewordData = "";
   if (noneOrUndrafted == "None") {
     forewordData = "<br>Les joueurs dont l'université n'est pas renseignée ne sont pas pris en compte, par souci de lisibilité";
@@ -1662,21 +1503,15 @@ function handleDisplay() {
     $("#table_section").removeClass("displayBlock");
     $("#table_section").addClass('displayNone');
 
-    if (window.isGraphable[0]) {
-      $("#graph_section").removeClass("displayNone");
-      $("#graph_section").addClass('displayBlock');
-      $("#forewordGraph").removeClass("displayNone");
-      $("#forewordGraph").addClass('displayBlock');
-    }
-    else {
-      notGraphable_function(window.isGraphable[1]);
+    $("#graph_section").removeClass("displayNone");
+    $("#graph_section").addClass('displayBlock');
+    $("#forewordGraph").removeClass("displayNone");
+    $("#forewordGraph").addClass('displayBlock');
+    if (window.workInProgressCollege) {
+      alert("Veuillez nous excuser, l'affichage des universités sous forme de graphe est encore en cours de construction d'où une présentation encore peu lisible.");
     }
   }
   if (choice == "table") {
-    if (!(window.isGraphable[0])) {
-      $("#errorParameterDisplayGraph").html("");
-      $("#forewordGraph").html("");
-    }
     $("#graph_section").removeClass("displayBlock");
     $("#graph_section").addClass('displayNone');
     $("#forewordGraph").removeClass("displayBlock");
@@ -1684,6 +1519,9 @@ function handleDisplay() {
 
     $("#table_section").removeClass("displayNone");
     $("#table_section").addClass('displayBlock');
+    if (window.workInProgressTable) {
+      alert("Veuillez nous excuser, l'affichage des tableaux pour une saison est encore en cours de construction d'où une présentation encore peu esthétique.");
+    }
   }
   return false; // prevent further bubbling of event
 }
