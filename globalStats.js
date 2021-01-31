@@ -1,5 +1,4 @@
 $(document).ready(function(){
-  var endpoint = "http://127.0.0.1:3030/project/sparql";
   //Load each season
   var query = `PREFIX : <http://project#>
 
@@ -66,7 +65,6 @@ function printStat() {
   season_selected = document.getElementById("season_select").options[document.getElementById('season_select').selectedIndex].value;
   var res_season = season_selected.split(" ");
 
-  var endpoint = "http://127.0.0.1:3030/project/sparql";
 
   var notStatsRDF = ["name", "college", "country", "draftYear", "draftRound", "draftNumber"];
   var notNumStat = ["college", "country", "draftYear", "draftRound", "draftNumber", "team"];
@@ -370,10 +368,7 @@ function printStat() {
     th_param.appendChild(th_param_txt);
     element_table.appendChild(th_param);
 
-    // var body_table = document.getElementById("bodyTable");
-    // while (body_table.firstChild) {
     //     body_table.removeChild(body_table.firstChild);
-    // }
     if (notStatsRDF.includes(res_stats[0])) {
       query = `PREFIX : <http://project#>
 
