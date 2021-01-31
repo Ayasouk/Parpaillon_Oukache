@@ -751,6 +751,9 @@ function displayResult(data) {
         let td_property = document.createElement("td");
         let td_object = document.createElement("td");
         let td_property_txt = document.createTextNode(res_space);
+        let att = document.createAttribute("style");
+        att.value = "text-align: left";
+        td_property.setAttributeNode(att);
         var td_object_txt;
 
         switch (head1)
@@ -881,14 +884,6 @@ function displayResultAllSeasons(data) {
   td_object.appendChild(td_object_txt);
   element_table.appendChild(td_object);
   window.dataGraph[data.results.bindings[0].index.value][2] = average;
-}
-
-function notGraphable_function(data) {
-  var element_table = document.getElementById("headerTable");
-  while (element_table.firstChild) {
-      element_table.removeChild(element_table.firstChild);
-  }
-  $("#errorParameterDisplayGraph").html("Can't load "+data+" as a graph for now");
 }
 
 function printScatterPlotGraphAllSeasons(param_text_x, param_text_y) {
